@@ -46,7 +46,7 @@ OBJECT Codeunit 50005 Dictionary-TempBLOB facade
     BEGIN
     {
       TempBLOB facade.
-	  Build 9.00.47864
+      Build 9.00.47864
 
       http://vjeko.com/tempblob-faade-a-pattern-proposition/
     }
