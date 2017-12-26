@@ -1,0 +1,55 @@
+OBJECT Codeunit 50005 Dictionary-TempBLOB facade
+{
+  OBJECT-PROPERTIES
+  {
+    Date=26/12/17;
+    Time=18:49:06;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+
+            DictionaryToBlob;
+          END;
+
+  }
+  CODE
+  {
+
+    LOCAL PROCEDURE DictionaryToBlob@2();
+    VAR
+      Dict@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Generic.Dictionary`2";
+      Obj@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      TempBlob@1001 : TEMPORARY Record 99008535;
+      InStream@1003 : InStream;
+      OutStream@1004 : OutStream;
+      Txt@1005 : Text;
+    BEGIN
+      Dict := Dict.Dictionary;
+      Dict.Add(10,'1');
+      Dict.Add(20,'22');
+
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      FOREACH Obj IN Dict DO BEGIN
+        OutStream.WRITE(FORMAT(Obj));
+      END;
+
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      WHILE NOT InStream.EOS DO BEGIN
+        InStream.READTEXT(Txt);
+        MESSAGE(Txt);
+      END
+    END;
+
+    BEGIN
+    {
+      TempBLOB facade.
+
+      http://vjeko.com/tempblob-faade-a-pattern-proposition/
+    }
+    END.
+  }
+}
+
