@@ -2,8 +2,8 @@ OBJECT Codeunit 50010 My Functions
 {
   OBJECT-PROPERTIES
   {
-    Date=16/11/17;
-    Time=11:56:38;
+    Date=27/12/17;
+    Time=12:20:13;
     Modified=Yes;
     Version List=;
   }
@@ -120,6 +120,9 @@ OBJECT Codeunit 50010 My Functions
     END;
 
     BEGIN
+    {
+      Build 9.00.47864
+    }
     END.
   }
 }
