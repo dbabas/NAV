@@ -1,0 +1,59 @@
+OBJECT Codeunit 50006 Save multiple pictures as zip
+{
+  OBJECT-PROPERTIES
+  {
+    Date=27/12/17;
+    Time=12:13:03;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+
+            SavePictures;
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE SavePictures@1000000003();
+    VAR
+      FileManagement@1000000003 : Codeunit 419;
+      ServerTempFilePath@1000000004 : Text;
+      ZipTempFilePath@1000000000 : Text;
+      TargetFileName@1000000002 : Text;
+      CompanyInformation@1000 : Record 79;
+    BEGIN
+      CompanyInformation.GET;
+      ZipTempFilePath := FileManagement.CreateZipArchiveObject();
+      ServerTempFilePath := FileManagement.ServerTempFileName('png');
+      CompanyInformation.CALCFIELDS(Picture);
+
+      WITH CompanyInformation DO BEGIN
+        IF Picture.HASVALUE THEN BEGIN
+          Picture.EXPORT(ServerTempFilePath);
+          FileManagement.AddFileToZipArchive(ServerTempFilePath,'pic1.png');
+        END;
+
+        IF Picture.HASVALUE THEN BEGIN
+          Picture.EXPORT(ServerTempFilePath);
+          FileManagement.AddFileToZipArchive(ServerTempFilePath,'pic2.png');
+        END;
+
+        TargetFileName := FileManagement.SaveFileDialog('Save Pictures','Company Info Pictures.zip','Zip files|*.zip');
+      END;
+      FileManagement.CloseZipArchive;
+      IF TargetFileName<>'' THEN
+        FileManagement.DownloadToFile(ZipTempFilePath,TargetFileName);
+    END;
+
+    BEGIN
+    {
+      Build 9.00.47864
+    }
+    END.
+  }
+}
+
