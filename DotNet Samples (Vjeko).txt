@@ -1,0 +1,375 @@
+OBJECT Codeunit 50030 DotNet Samples
+{
+  OBJECT-PROPERTIES
+  {
+    Date=27/12/17;
+    Time=17:26:02;
+    Modified=Yes;
+    Version List=TECHDAYS.2013;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+            //SystemDateTime;
+            SystemConvert;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      i@1000 : Integer;
+
+    PROCEDURE IsValidEMail@9(EMail@1001 : Text) : Boolean;
+    VAR
+      Regex@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex";
+    BEGIN
+      EXIT(Regex.Regex('^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$').Match(EMail).Success);
+    END;
+
+    PROCEDURE DateFormatDemo@1();
+    VAR
+      Culture@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
+      DateTimeFormat@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.DateTimeFormatInfo";
+      String@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+      DateTime@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTime";
+    BEGIN
+      Culture := Culture.GetCultureInfo('nl-NL');
+      DateTimeFormat := Culture.DateTimeFormat;
+
+      DateTime := CURRENTDATETIME;
+
+      MESSAGE(DateTime.ToString(DateTimeFormat.LongDatePattern,Culture));
+    END;
+
+    PROCEDURE FileDemo@55();
+    VAR
+      F@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.File";
+      Cust@1001 : Record 18;
+      Env@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Environment";
+      p@1003 : Text;
+      Path@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Path";
+      Directory@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Directory";
+      fname@1006 : Text;
+    BEGIN
+      p := 'C:\Temp\SomeFolder\Some Subfolder\Yet another folder\enough folders';
+      fname := Path.Combine(p,'cust.txt');
+
+      MESSAGE(fname);
+
+      Directory.CreateDirectory(p);
+
+      IF Cust.FINDSET THEN
+        REPEAT
+          F.AppendAllText(p + '\cust.txt',Cust.Name + Env.NewLine);
+        UNTIL Cust.NEXT = 0;
+    END;
+
+    PROCEDURE EventLogDemo@2();
+    VAR
+      EventLog@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Diagnostics.EventLog";
+      EventLogEntryType@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Diagnostics.EventLogEntryType";
+    BEGIN
+      EventLog.WriteEntry('MicrosoftDynamicsNavServer','Antwerp NAV TechDays 2013 running smoothly.',
+        EventLogEntryType.Information);
+    END;
+
+    PROCEDURE HashTableDemo@25();
+    VAR
+      HashTable@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Hashtable";
+      Cust@1001 : Record 18;
+      CustTemp@1002 : TEMPORARY Record 18;
+      i@1003 : Integer;
+      Key@1004 : Text;
+      Sw1@1005 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Diagnostics.Stopwatch";
+      Sw2@1006 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Diagnostics.Stopwatch";
+    BEGIN
+      HashTable := HashTable.Hashtable;
+
+      FOR i := 1 TO 1000 DO
+        IF Cust.FINDSET THEN
+          REPEAT
+            CustTemp := Cust;
+            CustTemp."No." := STRSUBSTNO('%1-%2',i,Cust."No.");
+            CustTemp.INSERT;
+          UNTIL Cust.NEXT = 0;
+
+      FOR i := 1 TO 1000 DO
+        IF Cust.FINDSET THEN
+          REPEAT
+            HashTable.Add(STRSUBSTNO('%1-%2',i,Cust."No."),Cust.Name);
+          UNTIL Cust.NEXT = 0;
+
+      Sw1 := Sw1.Stopwatch;
+      Sw2 := Sw2.Stopwatch;
+
+      FOR i := 1 TO 100000 DO BEGIN
+        Cust.FINDFIRST;
+        Cust.NEXT(RANDOM(Cust.COUNT));
+        Key := STRSUBSTNO('%1-%2',RANDOM(1000),Cust."No.");
+
+        Sw1.Start;
+        CustTemp.GET(Key);
+        Sw1.Stop;
+
+        Sw2.Start;
+        HashTable.Item(Key);
+        Sw2.Stop;
+      END;
+
+      MESSAGE('Retrieving %1 in %2 ms for temporary table\Retrieving %1 in %3 ms for hasthable',
+        i,
+        Sw1.ElapsedMilliseconds,
+        Sw2.ElapsedMilliseconds);
+    END;
+
+    PROCEDURE StreamDemo@45();
+    VAR
+      Stream@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.FileStream";
+      F@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.File";
+    BEGIN
+      Stream := F.Create('C:\Temp\contacts.txt');
+
+      XMLPORT.EXPORT(XMLPORT::"Export Contact",Stream);
+
+      Stream.Close;
+    END;
+
+    PROCEDURE PictureDemo@49();
+    VAR
+      Item@1000 : Record 27;
+      WebClient@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebClient";
+      Uri@1002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri";
+      MemStream@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      Stream@1005 : OutStream;
+    BEGIN
+      WebClient := WebClient.WebClient;
+      Uri := Uri.Uri('http://bicycletutor.com/images/bike-map-large.jpg');
+      MemStream := MemStream.MemoryStream(WebClient.DownloadData(Uri));
+
+      Item.GET('1000');
+      Item.Picture.CREATEOUTSTREAM(Stream);
+      MemStream.CopyTo(Stream);
+      Item.MODIFY;
+    END;
+
+    PROCEDURE BigIntDemo@15();
+    VAR
+      BI@1002 : DotNet "'System.Numerics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Numerics.BigInteger";
+      i@1001 : Integer;
+      MaxInt@1000 : Integer;
+    BEGIN
+      MaxInt := 2147483647;
+      BI := BI.BigInteger(MaxInt);
+      FOR i := 1 TO 100 DO
+        BI := BI.Multiply(BI,BI.BigInteger(MaxInt));
+
+      MESSAGE('%1',BI);
+    END;
+
+    LOCAL PROCEDURE "---MyFunctions---"@6();
+    BEGIN
+      ////////////////////////////////////My Functions/////////////////////////////////////////////////
+    END;
+
+    PROCEDURE SystemString@4();
+    VAR
+      String@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+      t@1001 : Text;
+    BEGIN
+      IF NOT String.IsNullOrWhiteSpace(t) THEN
+         MESSAGE(t);
+    END;
+
+    PROCEDURE SystemTextStringBuilder@3();
+    VAR
+      StringBuilder@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.StringBuilder";
+      t@1001 : Text;
+    BEGIN
+      IF CONFIRM('Ready?') THEN;
+
+      FOR i:=1 TO 50000 DO
+        t += '1234567890';
+
+      MESSAGE('I am done with %1 characters',STRLEN(t));
+      //****
+      IF CONFIRM('Ready to StringBuilder?') THEN;
+
+      StringBuilder := StringBuilder.StringBuilder;
+
+      FOR i:=1 TO 50000 DO
+        StringBuilder.Append('1234567890');
+
+      MESSAGE('I am done with %1 characters',StringBuilder.Length);
+    END;
+
+    PROCEDURE SystemDiagnosticsStopwatch@7();
+    VAR
+      SW@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Diagnostics.Stopwatch";
+      t@1001 : Text;
+      StringBuilder@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.StringBuilder";
+    BEGIN
+      IF CONFIRM('Ready?') THEN;
+
+      SW := SW.Stopwatch;
+
+      FOR i:=1 TO 25000 DO BEGIN
+        SW.Start;
+        t += '1234567890';
+        SW.Stop;
+      END;
+
+      MESSAGE('I am done with %1 characters in %2 ms',STRLEN(t), SW.ElapsedMilliseconds);
+      //****
+      IF CONFIRM('Ready to StringBuilder?') THEN;
+
+      StringBuilder := StringBuilder.StringBuilder;
+      SW.Reset;
+      FOR i:=1 TO 25000 DO BEGIN
+        SW.Start;
+        StringBuilder.Append('1234567890');
+        SW.Stop;
+      END;
+
+      MESSAGE('I am done with %1 characters in %2 ms',StringBuilder.Length, SW.ElapsedMilliseconds);
+    END;
+
+    PROCEDURE SystemDateTime@10();
+    VAR
+      DT@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTime";
+    BEGIN
+      DT := DT.DateTime(2001,2,28);
+      MESSAGE('Is a leap year %1',DT.IsLeapYear(DT.Year));
+
+      DT := CURRENTDATETIME;//can be directly assigned.
+    END;
+
+    PROCEDURE SystemConvert@5();
+    VAR
+      SystemConvert@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      i@1001 : Integer;
+      t@1002 : Text;
+      d@1003 : Decimal;
+    BEGIN
+      MESSAGE(SystemConvert.ToString(1234));
+      i := SystemConvert.ToInt32('1000');
+      d := SystemConvert.ToDecimal('13.4');
+
+      MESSAGE(FORMAT(i+50));
+      MESSAGE(FORMAT(d+1.4));
+    END;
+
+    BEGIN
+    {
+      Build 9.00.47864
+
+      https://www.youtube.com/watch?v=R-s6g9oG7S8
+    }
+    END.
+  }
+}
+
+OBJECT Page 50031 FileSystemWatcher Demo
+{
+  OBJECT-PROPERTIES
+  {
+    Date=08/11/13;
+    Time=05:59:46;
+    Modified=Yes;
+    Version List=TECHDAYS.2013;
+  }
+  PROPERTIES
+  {
+    Editable=No;
+    SourceTable=Table2000000022;
+    PageType=List;
+    SourceTableTemporary=Yes;
+    OnInit=BEGIN
+             FileSystemWatcher := FileSystemWatcher.FileSystemWatcher('C:\Temp');
+             FileSystemWatcher.NotifyFilter :=
+               Convert.ToInt32(NotifyFilter.FileName) +
+               Convert.ToInt32(NotifyFilter.DirectoryName) +
+               Convert.ToInt32(NotifyFilter.Size) +
+               Convert.ToInt32(NotifyFilter.LastWrite) +
+               Convert.ToInt32(NotifyFilter.CreationTime);
+
+             FileSystemWatcher.EnableRaisingEvents := TRUE;
+           END;
+
+  }
+  CONTROLS
+  {
+    { 1   ;0   ;Container ;
+                ContainerType=ContentArea }
+
+    { 2   ;1   ;Group     ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 3   ;2   ;Field     ;
+                SourceExpr=Path }
+
+    { 4   ;2   ;Field     ;
+                SourceExpr="Is a file" }
+
+    { 5   ;2   ;Field     ;
+                SourceExpr=Name }
+
+    { 6   ;2   ;Field     ;
+                SourceExpr=Size }
+
+    { 7   ;2   ;Field     ;
+                SourceExpr=Date }
+
+    { 8   ;2   ;Field     ;
+                SourceExpr=Time }
+
+    { 9   ;2   ;Field     ;
+                SourceExpr=Data }
+
+  }
+  CODE
+  {
+    VAR
+      FileSystemWatcher@1000 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.FileSystemWatcher" WITHEVENTS;
+      NotifyFilter@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.NotifyFilters";
+      Convert@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      Enum@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Enum";
+
+    EVENT FileSystemWatcher@1000::Changed@26(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.FileSystemEventArgs");
+    BEGIN
+    END;
+
+    EVENT FileSystemWatcher@1000::Created@27(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.FileSystemEventArgs");
+    BEGIN
+      Rec.INIT;
+      Rec.Path := e.FullPath;
+      Rec.INSERT;
+      CurrPage.UPDATE(FALSE);
+    END;
+
+    EVENT FileSystemWatcher@1000::Deleted@28(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.FileSystemEventArgs");
+    BEGIN
+      IF Rec.GET(e.FullPath) THEN BEGIN
+        Rec.DELETE;
+        CurrPage.UPDATE(FALSE);
+      END;
+    END;
+
+    EVENT FileSystemWatcher@1000::Error@29(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.ErrorEventArgs");
+    BEGIN
+    END;
+
+    EVENT FileSystemWatcher@1000::Renamed@30(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.RenamedEventArgs");
+    BEGIN
+    END;
+
+    EVENT FileSystemWatcher@1000::Disposed@31(sender@1001 : Variant;e@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.EventArgs");
+    BEGIN
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
