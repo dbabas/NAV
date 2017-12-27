@@ -1,0 +1,126 @@
+OBJECT Codeunit 50010 My Functions
+{
+  OBJECT-PROPERTIES
+  {
+    Date=16/11/17;
+    Time=11:56:38;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+            //MESSAGE(CheckIfFileExistsInFolder('C:\Test'))
+            //PrintFileToDefaultPrinter('C:\Test\INV0001.pdf');
+            //ExecuteShellCommand('dir > c:\test\dir.txt');
+            TestTxt := 'This is a test';
+            DeleteSpacesFromString(TestTxt);
+            MESSAGE(TestTxt);
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      TestTxt@1000 : Text;
+
+    PROCEDURE CheckIfFileExistsInFolder@1(pPath@1000 : Text[250]) : Text[250];
+    VAR
+      FileList@1001 : Record 2000000022;
+    BEGIN
+      //Check if a file exists in a folder
+      //The File table is only filled after setting a filter.
+
+      FileList.RESET;
+      FileList.SETRANGE(Path,  pPath);
+      FileList.SETRANGE("Is a file",TRUE);
+      FileList.SETFILTER(Name,'*.pdf');
+      IF FileList.FINDFIRST THEN;
+      EXIT(FileList.Name);
+    END;
+
+    PROCEDURE LoopThroughFilesInFolderDotNet@6();
+    VAR
+      List@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array" RUNONCLIENT;
+      DirectoryInfo@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.DirectoryInfo" RUNONCLIENT;
+      FileInfo@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.FileInfo" RUNONCLIENT;
+      i@1000 : Integer;
+    BEGIN
+      //Loop through the files in a directory using .net
+      DirectoryInfo := DirectoryInfo.DirectoryInfo('C:\Temp\');
+      List := DirectoryInfo.GetFiles('*test*.txt');
+      FOR i :=0 TO List.Length-1 DO BEGIN
+        FileInfo := List.GetValue(i);
+      END;
+    END;
+
+    PROCEDURE PrintFileToSelectedPrinter@1000000039(Filename@1000000000 : Text);
+    VAR
+      ProcessStartInfo@1000000003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Diagnostics.ProcessStartInfo" RUNONCLIENT;
+      Process@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Diagnostics.Process" RUNONCLIENT;
+      ProcessWindowStyle@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Diagnostics.ProcessWindowStyle" RUNONCLIENT;
+      PrintDialog@1000 : DotNet "'System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Windows.Forms.PrintDialog" RUNONCLIENT;
+      DialogResult@1001 : DotNet "'System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Windows.Forms.DialogResult";
+    BEGIN
+      //Prints any kind of file. It raises a printer sellection dialog.
+      ProcessStartInfo := ProcessStartInfo.ProcessStartInfo(Filename);
+      PrintDialog := PrintDialog.PrintDialog;
+      DialogResult := PrintDialog.ShowDialog;
+      IF DialogResult.ToString = 'OK' THEN BEGIN
+        WITH ProcessStartInfo DO BEGIN
+          Arguments := '"'+ PrintDialog.PrinterSettings.PrinterName+'"';
+          CreateNoWindow := TRUE;
+          WindowStyle := ProcessWindowStyle.Hidden;
+          UseShellExecute := TRUE;
+          Verb := 'PrintTo';
+        END;
+      END;
+      Process.Start(ProcessStartInfo);
+    END;
+
+    PROCEDURE PrintFileToDefaultPrinter@2(Filename@1000000000 : Text);
+    VAR
+      ProcessStartInfo@1000000003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Diagnostics.ProcessStartInfo" RUNONCLIENT;
+      Process@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Diagnostics.Process" RUNONCLIENT;
+      ProcessWindowStyle@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Diagnostics.ProcessWindowStyle" RUNONCLIENT;
+    BEGIN
+      //Prints any kind of file to default printer.
+      ProcessStartInfo := ProcessStartInfo.ProcessStartInfo(Filename);
+      WITH ProcessStartInfo DO BEGIN
+        CreateNoWindow := TRUE;
+        WindowStyle := ProcessWindowStyle.Hidden;
+        UseShellExecute := TRUE;
+        Verb := 'Print';
+      END;
+      Process.Start(ProcessStartInfo);
+    END;
+
+    PROCEDURE ExecuteShellCommand@3(Arguments@1001 : Text);
+    VAR
+      Process@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Diagnostics.Process" RUNONCLIENT;
+    BEGIN
+      //Executes a command like SHELL
+      //The Arguments must be a string with the command to be executed.
+      Process := Process.Process;
+      Process.StartInfo.UseShellExecute := FALSE;
+      Process.StartInfo.FileName := 'cmd.exe';
+      Process.StartInfo.Arguments := '/c '+Arguments;
+      Process.StartInfo.CreateNoWindow := TRUE;
+      Process.Start();
+      CLEAR(Process);
+    END;
+
+    LOCAL PROCEDURE "---Strings---"@4();
+    BEGIN
+    END;
+
+    PROCEDURE DeleteSpacesFromString@5(VAR vString@1000 : Text);
+    BEGIN
+      vString := DELCHR(vString,'=',' ');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
