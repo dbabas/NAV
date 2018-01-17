@@ -2,8 +2,8 @@ OBJECT Codeunit 50010 My Functions
 {
   OBJECT-PROPERTIES
   {
-    Date=27/12/17;
-    Time=12:20:13;
+    Date=17/01/18;
+    Time=23:19:28;
     Modified=Yes;
     Version List=;
   }
@@ -13,9 +13,9 @@ OBJECT Codeunit 50010 My Functions
             //MESSAGE(CheckIfFileExistsInFolder('C:\Test'))
             //PrintFileToDefaultPrinter('C:\Test\INV0001.pdf');
             //ExecuteShellCommand('dir > c:\test\dir.txt');
-            TestTxt := 'This is a test';
-            DeleteSpacesFromString(TestTxt);
-            MESSAGE(TestTxt);
+            //TestTxt := 'This is a test';
+            //DeleteSpacesFromString(TestTxt);
+            MESSAGE(GetWindowsLoginUser);
           END;
 
   }
@@ -108,6 +108,19 @@ OBJECT Codeunit 50010 My Functions
       Process.StartInfo.CreateNoWindow := TRUE;
       Process.Start();
       CLEAR(Process);
+    END;
+
+    PROCEDURE GetWindowsLoginUser@7() : Text[50];
+    VAR
+      Session@1000 : Record 2000000009;
+    BEGIN
+      WITH Session DO BEGIN
+        SETRANGE("My Session", TRUE);
+        IF FINDFIRST AND ("Login Type"="Login Type"::Windows) THEN
+          EXIT("User ID")
+        ELSE
+          EXIT('');
+      END;
     END;
 
     LOCAL PROCEDURE "---Strings---"@4();
