@@ -41,6 +41,7 @@ OBJECT Codeunit 60000 REST WS Management
 	https://goo.gl/2m2Uqb
 	https://wp.me/p1ij3T-ph
 	https://wp.me/p1ij3T-qS
+	Other usefull examples https://wp.me/p1ij3T-pm
 
 	-See codeunits 1294, 1297, 1299
 	-Important screenshots in the video: 23:30, 
@@ -146,13 +147,14 @@ OBJECT Codeunit 60002 Verify Email Address WS
       https://goo.gl/2m2Uqb
       https://wp.me/p1ij3T-ph
       https://wp.me/p1ij3T-qS
+      Other usefull examples https://wp.me/p1ij3T-pm
 
       -See codeunits 1294, 1297, 1299
       -Important screenshots in the video: 23:30,
 	  
-	  It needs the dll that is created by selializing the response JSON file. Explanations in the links above.
-	  Newtonsoft's dll must be copied into the Add-in folder only for the developmnent time.
-	  http://api.email-validator.net/api/verify?EmailAddress=ajk@cronus.company&APIKey=ev-8915975538904936e89c6e9416666c01
+      It needs the dll that is created by selializing the response JSON file. Explanations in the links above.
+      Newtonsoft's dll must be copied into the Add-in folder only for the developmnent time.
+      http://api.email-validator.net/api/verify?EmailAddress=ajk@cronus.company&APIKey=ev-8915975538904936e89c6e9416666c01
     }
     END.
   }
