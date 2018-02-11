@@ -1,0 +1,46 @@
+OBJECT Codeunit 50020 SendKeys
+{
+  OBJECT-PROPERTIES
+  {
+    Date=11/02/18;
+    Time=10:26:43;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE SendKeysDotNET@1000000028();
+    VAR
+      SendKeys@1000000000 : DotNet "'System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Windows.Forms.SendKeys" RUNONCLIENT;
+    BEGIN
+      SendKeys.SendWait('^%{F1}'); //Example: send Control+Alt+F1
+    END;
+
+    PROCEDURE SendKeysAutomation@1000000029();
+    VAR
+      WshShell@1000000000 : Automation "{F935DC20-1CF0-11D0-ADB9-00C04FD58A0B} 1.0:{72C24DD5-D70A-438B-8A42-98424B88AFB8}:'Windows Script Host Object Model'.WshShell";
+    BEGIN
+      IF ISCLEAR(WshShell) THEN
+        CREATE(WshShell,FALSE,TRUE);
+      WshShell.SendKeys('^+V')
+    END;
+
+    BEGIN
+    {
+      Build: 10.00.14540
+
+      -Bear in mind that automation can run only on the client side.
+      -Don't forget to set the .NET variable to run on the client.
+      -Details about the dll library here https://goo.gl/SEZ1eZ
+    }
+    END.
+  }
+}
+
