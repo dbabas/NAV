@@ -2,8 +2,8 @@ OBJECT Codeunit 50010 My Functions
 {
   OBJECT-PROPERTIES
   {
-    Date=17/01/18;
-    Time=23:19:28;
+    Date=12/02/18;
+    Time=17:45:30;
     Modified=Yes;
     Version List=;
   }
@@ -15,7 +15,8 @@ OBJECT Codeunit 50010 My Functions
             //ExecuteShellCommand('dir > c:\test\dir.txt');
             //TestTxt := 'This is a test';
             //DeleteSpacesFromString(TestTxt);
-            MESSAGE(GetWindowsLoginUser);
+            //MESSAGE(GetWindowsLoginUser);
+            MESSAGE(FORMAT(FindPositionOfStringInCommaSeparated('Test3','Test1,Test2,Test3',',')));
           END;
 
   }
@@ -130,6 +131,23 @@ OBJECT Codeunit 50010 My Functions
     PROCEDURE DeleteSpacesFromString@5(VAR vString@1000 : Text);
     BEGIN
       vString := DELCHR(vString,'=',' ');
+    END;
+
+    PROCEDURE FindPositionOfStringInCommaSeparated@8(StringToFind@1000 : Text;CommaSeparatedStr@1001 : Text;Separator@1002 : Text) : Integer;
+    VAR
+      StrDotNet@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+      SeparatorDotNet@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+      Values@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      i@1006 : Integer;
+    BEGIN
+      StrDotNet := CommaSeparatedStr;
+      SeparatorDotNet := Separator;
+      Values := StrDotNet.Split(SeparatorDotNet.ToCharArray());
+
+      FOR i :=0 TO Values.Length-1 DO BEGIN
+        IF FORMAT(Values.GetValue(i)) = StringToFind THEN
+          EXIT(i+1);
+      END;
     END;
 
     BEGIN
