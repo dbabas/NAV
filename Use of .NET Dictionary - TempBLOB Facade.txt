@@ -2,8 +2,8 @@ OBJECT Codeunit 50005 Dictionary-TempBLOB facade
 {
   OBJECT-PROPERTIES
   {
-    Date=26/12/17;
-    Time=18:49:06;
+    Date=14/02/18;
+    Time=23:23:26;
     Modified=Yes;
     Version List=;
   }
@@ -22,15 +22,25 @@ OBJECT Codeunit 50005 Dictionary-TempBLOB facade
     VAR
       Dict@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Generic.Dictionary`2";
       Obj@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      Pair@1006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Generic.KeyValuePair`2";
       TempBlob@1001 : TEMPORARY Record 99008535;
       InStream@1003 : InStream;
       OutStream@1004 : OutStream;
       Txt@1005 : Text;
+      i@1007 : Integer;
     BEGIN
       Dict := Dict.Dictionary;
       Dict.Add(10,'1');
       Dict.Add(20,'22');
 
+      //Use the pairs 1st option (found within standard NAV)
+      FOREACH Pair IN Dict DO BEGIN
+        Txt := Pair.Value;
+        i := Pair.Key;
+        MESSAGE(FORMAT(i)+','+Txt);
+      END;
+
+      //Use the pairs 2nd option
       TempBlob.Blob.CREATEOUTSTREAM(OutStream);
       FOREACH Obj IN Dict DO BEGIN
         OutStream.WRITE(FORMAT(Obj));
@@ -46,7 +56,6 @@ OBJECT Codeunit 50005 Dictionary-TempBLOB facade
     BEGIN
     {
       TempBLOB facade.
-      Build 9.00.47864
 
       http://vjeko.com/tempblob-faade-a-pattern-proposition/
     }
