@@ -1,0 +1,55 @@
+OBJECT Codeunit 50015 Send HTTP request - Automation
+{
+  OBJECT-PROPERTIES
+  {
+    Date=16/02/18;
+    Time=19:53:26;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+            URL := 'http://api.openweathermap.org/data/2.5/weather?q=London,uk&appid=2b2519de630b0ef72894273047869f39';
+            URL += '&Key=' + EncodeUri('AF16-XU69-UZ92-YJ62');
+            URL += '&Text=' + EncodeUri('SN4 8RB');
+            CREATE(XMLRequest);
+            XMLRequest.open('GET',URL,FALSE);
+            XMLRequest.send();
+            Response := XMLRequest.responseText;
+
+            MESSAGE(Response);
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      URL@1000000000 : Text[1024];
+      XMLRequest@1000000001 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 3.0:{F6D90F16-9C73-11D3-B32E-00C04F990BB4}:'Microsoft XML, v3.0'.XMLHTTP";
+      Response@1000000002 : Text[1024];
+
+    PROCEDURE EncodeUri@1000000000(Uri@1000000000 : Text[80]) EncodedUri : Text[250];
+    VAR
+      HexDigits@1000000002 : Text[30];
+      i@1000000003 : Integer;
+      b@1000000004 : Integer;
+    BEGIN
+      // No URI Encoding in NAV - we do it ourself...
+      HexDigits := '0123456789ABCDEF';
+      EncodedUri := '';
+      FOR i:=1 TO STRLEN(Uri) DO
+      BEGIN
+        b := Uri[i];
+        EncodedUri := EncodedUri + '%  ';
+        EncodedUri[STRLEN(EncodedUri)-1] := HexDigits[(b DIV 16)+1];
+        EncodedUri[STRLEN(EncodedUri)] := HexDigits[(b MOD 16)+1];
+      END;
+      EXIT(EncodedUri);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
