@@ -1,33 +1,206 @@
+OBJECT Form 50005 Post Code Validation
+{
+  OBJECT-PROPERTIES
+  {
+    Date=17/02/18;
+    Time=14:57:18;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Width=9790;
+    Height=6710;
+    Editable=No;
+    TableBoxID=1000000000;
+    SourceTable=Table18;
+  }
+  CONTROLS
+  {
+    { 1000000000;TableBox;220 ;220  ;9350 ;5500 ;HorzGlue=Both;
+                                                 VertGlue=Both }
+    { 1000000001;TextBox;0    ;0    ;1700 ;0    ;ParentControl=1000000000;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Search Name" }
+    { 1000000002;Label  ;0    ;0    ;0    ;0    ;ParentControl=1000000001;
+                                                 InColumnHeading=Yes }
+    { 1000000003;TextBox;0    ;0    ;4400 ;0    ;HorzGlue=Both;
+                                                 ParentControl=1000000000;
+                                                 InColumn=Yes;
+                                                 SourceExpr=Address }
+    { 1000000004;Label  ;0    ;0    ;0    ;0    ;ParentControl=1000000003;
+                                                 InColumnHeading=Yes }
+    { 1000000005;CommandButton;2530;5940;2200;550;
+                                                 HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Default=Yes;
+                                                 PushAction=LookupOK;
+                                                 InvalidActionAppearance=Hide }
+    { 1000000006;CommandButton;4950;5940;2200;550;
+                                                 HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Cancel=Yes;
+                                                 PushAction=LookupCancel;
+                                                 InvalidActionAppearance=Hide }
+    { 1000000007;CommandButton;7370;5940;2200;550;
+                                                 HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 PushAction=FormHelp }
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+
 OBJECT Codeunit 50015 Send HTTP request - Automation
 {
   OBJECT-PROPERTIES
   {
-    Date=16/02/18;
-    Time=19:53:26;
+    Date=17/02/18;
+    Time=18:24:31;
     Modified=Yes;
     Version List=;
   }
   PROPERTIES
   {
     OnRun=BEGIN
-            URL := 'http://api.openweathermap.org/data/2.5/weather?q=London,uk&appid=2b2519de630b0ef72894273047869f39';
-            URL += '&Key=' + EncodeUri('AF16-XU69-UZ92-YJ62');
-            URL += '&Text=' + EncodeUri('SN4 8RB');
-            CREATE(XMLRequest);
-            XMLRequest.open('GET',URL,FALSE);
-            XMLRequest.send();
-            Response := XMLRequest.responseText;
 
-            MESSAGE(Response);
           END;
 
   }
   CODE
   {
     VAR
+      SalesSetup@1000000004 : Record 311;
       URL@1000000000 : Text[1024];
       XMLRequest@1000000001 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 3.0:{F6D90F16-9C73-11D3-B32E-00C04F990BB4}:'Microsoft XML, v3.0'.XMLHTTP";
       Response@1000000002 : Text[1024];
+      XMLDoc@1000000003 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{88D96A05-F192-11D4-A65F-0040963251E5}:'Microsoft XML, v6.0'.DOMDocument60";
+
+    PROCEDURE GetAddress@1000000001(PostCode@1000000000 : Code[20];VAR Address@1000000001 : Text[50];VAR "Address 2"@1000000002 : Text[50];VAR County@1000000003 : Text[30];VAR City@1000000004 : Text[30];VAR Country@1000000005 : Code[10];VAR ReturnPostCode@1000000006 : Code[20]);
+    VAR
+      XMLDoc@1000000007 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{88D96A05-F192-11D4-A65F-0040963251E5}:'Microsoft XML, v6.0'.DOMDocument60";
+      XMLDocNodeList@1000000008 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNodeList2@1000000009 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNodeList3@1000000020 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNode@1000000010 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      XMLDocNode2@1000000011 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      XMLDocNode3@1000000021 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      AttributeList@1000000012 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF83-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNamedNodeMap";
+      Attribute@1000000013 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      TempCust@1000000014 : TEMPORARY Record 18;
+      URLString@1000000015 : Text[1024];
+      i@1000000016 : Integer;
+      j@1000000017 : Integer;
+      RecCounter@1000000018 : Integer;
+      Container@1000000019 : Text[30];
+    BEGIN
+      IF NOT GUIALLOWED THEN
+        EXIT;
+
+      SalesSetup.GET;
+
+      URLString := 'http://services.postcodeanywhere.co.uk/Capture/Interactive/Find/v1.00/dataset.ws?';
+      //URLString += '&Key=' + EncodeUri(SalesSetup."PCA Predict Key");
+      URLString += '&Key=' + EncodeUri(<Put here PCAPredict Key>);
+      //URLString += '&Text=' + EncodeUri(PostCode);
+      URLString += '&Text=' + EncodeUri('SN4 8RB');
+
+      WSCall_Rest(URLString,XMLDoc);
+      //IF NOT WSCall_Rest(URLString,xmldoc) THEN
+      //  ERROR('PostcodeAnywhere Web service call failed');
+      XMLDocNodeList := XMLDoc.getElementsByTagName('NewDataSet');
+      XMLDocNode := XMLDocNodeList.item(0);
+      XMLDocNodeList2 := XMLDocNode.childNodes;
+      XMLDocNode2 := XMLDocNodeList2.item(0);
+      XMLDocNodeList3 := XMLDocNode2.childNodes;
+      FOR i :=0 TO XMLDocNodeList3.length-1 DO BEGIN
+        XMLDocNode3 := XMLDocNodeList3.item(i);
+        IF XMLDocNode3.nodeName = 'Id' THEN
+          Container := XMLDocNode3.text;
+        IF (XMLDocNode3.nodeName = 'Type') AND (XMLDocNode3.text<>'Address') THEN
+          URLString += '&Container=' + EncodeUri(Container);
+      END;
+      //message(URLString);
+      CLEAR(XMLDoc);
+      CLEAR(XMLDocNodeList);
+      CLEAR(XMLDocNodeList2);
+      CLEAR(XMLDocNodeList3);
+      CLEAR(XMLDocNode);
+      CLEAR(XMLDocNode2);
+      CLEAR(XMLDocNode2);
+      CLEAR(AttributeList);
+      CLEAR(Attribute);
+
+      WSCall_Rest(URLString,XMLDoc);
+      //IF NOT WSCall_Rest(URLString,xmldoc) THEN
+      //  ERROR('PostcodeAnywhere Web service call failed');
+
+      XMLDocNodeList := XMLDoc.getElementsByTagName('NewDataSet');
+      XMLDocNode := XMLDocNodeList.item(0);
+      XMLDocNodeList2 := XMLDocNode.childNodes;
+
+      RecCounter :=1;
+      FOR i:=0 TO XMLDocNodeList2.length-1 DO BEGIN
+        XMLDocNode2 := XMLDocNodeList2.item(i);
+        XMLDocNodeList3 := XMLDocNode2.childNodes;
+        FOR j:=0 TO XMLDocNodeList3.length-1 DO BEGIN
+          XMLDocNode3 := XMLDocNodeList3.item(j);
+          TempCust."No." := FORMAT(RecCounter);
+          RecCounter +=1;
+          CASE XMLDocNode3.nodeName OF
+            'Id': TempCust."Search Name" := COPYSTR(XMLDocNode3.text,1,30);
+            'Text': TempCust.Address := COPYSTR(XMLDocNode3.text,1,50);
+          END;
+        END;
+        TempCust.INSERT;
+      END;
+
+      IF FORM.RUNMODAL(50005 ,TempCust)=ACTION::LookupOK THEN
+        GetAddressDetails(TempCust."Search Name",ReturnPostCode,Address,"Address 2",County,City,Country);
+    END;
+
+    PROCEDURE GetAddressDetails@1000000003(ID@1000000000 : Text[30];VAR PostCode@1000000001 : Code[10];VAR Address@1000000002 : Text[50];VAR "Address 2"@1000000003 : Text[50];VAR County@1000000004 : Text[30];VAR City@1000000005 : Text[30];VAR Country@1000000006 : Code[10]);
+    VAR
+      XMLDoc@1000000007 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{88D96A05-F192-11D4-A65F-0040963251E5}:'Microsoft XML, v6.0'.DOMDocument60";
+      XMLDocNodeList@1000000018 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNodeList2@1000000017 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNodeList3@1000000012 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNode@1000000016 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      XMLDocNode2@1000000015 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      XMLDocNode3@1000000013 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      URLString@1000000011 : Text[1024];
+      i@1000000010 : Integer;
+      j@1000000009 : Integer;
+      RecCounter@1000000008 : Integer;
+    BEGIN
+      URLString := 'http://services.postcodeanywhere.co.uk/Capture/Interactive/Retrieve/v1.00/dataset.ws?';
+
+      //URLString += '&Key=' + EncodeUri(SalesSetup."PCA Predict Key");
+      URLString += '&Key=' + EncodeUri(<Put here PCAPredict Key>);
+      URLString += '&Id=' + EncodeUri(ID);
+
+      WSCall_Rest(URLString,XMLDoc);
+      XMLDoc.save('C:\Test\TestWS2.xml');
+      XMLDocNodeList := XMLDoc.getElementsByTagName('NewDataSet');
+      XMLDocNode := XMLDocNodeList.item(0);
+      XMLDocNodeList2 := XMLDoc.getElementsByTagName('Data');
+      XMLDocNode2 := XMLDocNodeList2.item(0);
+      XMLDocNodeList3 := XMLDocNode2.childNodes;
+      FOR j:=0 TO XMLDocNodeList3.length-1 DO BEGIN
+        XMLDocNode3 := XMLDocNodeList3.item(j);
+        CASE XMLDocNode3.nodeName OF
+          'PostalCode': PostCode := COPYSTR(XMLDocNode3.text,1,20);
+          'Line1': Address := COPYSTR(XMLDocNode3.text,1,50);
+          'Line2': "Address 2" := COPYSTR(XMLDocNode3.text,1,50);
+          'City': City := COPYSTR(XMLDocNode3.text,1,30);
+          'County': County := COPYSTR(XMLDocNode3.text,1,30);
+          'CountryIso2': Country := XMLDocNode3.text;
+        END;
+      END;
+    END;
 
     PROCEDURE EncodeUri@1000000000(Uri@1000000000 : Text[80]) EncodedUri : Text[250];
     VAR
@@ -46,6 +219,20 @@ OBJECT Codeunit 50015 Send HTTP request - Automation
         EncodedUri[STRLEN(EncodedUri)] := HexDigits[(b MOD 16)+1];
       END;
       EXIT(EncodedUri);
+    END;
+
+    PROCEDURE WSCall_Rest@1000000002(URL@1000000000 : Text[1024];VAR XMLDoc@1000000001 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{88D96A05-F192-11D4-A65F-0040963251E5}:'Microsoft XML, v6.0'.DOMDocument60");
+    VAR
+      XMLRequest@1000000002 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{88D96A0A-F192-11D4-A65F-0040963251E5}:'Microsoft XML, v6.0'.XMLHTTP60";
+    BEGIN
+      CREATE(XMLRequest);
+      CREATE(XMLDoc);
+      XMLRequest.open('GET',URL,FALSE);
+      XMLRequest.setRequestHeader('Content-type', 'text/xml; charset=utf-8');
+      XMLRequest.send();
+      XMLDoc := XMLRequest.responseXML;
+      //XMLDoc.loadXML(XMLRequest.responseText);
+      //MESSAGE(FORMAT(XMLDoc.text));
     END;
 
     BEGIN
