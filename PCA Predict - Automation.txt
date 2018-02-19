@@ -1,0 +1,3058 @@
+OBJECT Table 9 Country/Region
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19/02/18;
+    Time=13:00:47;
+    Modified=Yes;
+    Version List=NAVW15.00,MQ3.40,OP12513;
+  }
+  PROPERTIES
+  {
+    OnDelete=VAR
+               VATRegNoFormat@1000 : Record 381;
+             BEGIN
+               VATRegNoFormat.SETFILTER("Country/Region Code",Code);
+               VATRegNoFormat.DELETEALL;
+             END;
+
+    CaptionML=[ENU=Country/Region;
+               ENG=Country/Region];
+    LookupFormID=Form10;
+  }
+  FIELDS
+  {
+    { 1   ;   ;Code                ;Code10        ;CaptionML=[ENU=Code;
+                                                              ENG=Code];
+                                                   NotBlank=Yes }
+    { 2   ;   ;Name                ;Text50        ;CaptionML=[ENU=Name;
+                                                              ENG=Name] }
+    { 6   ;   ;EU Country/Region Code;Code10      ;CaptionML=[ENU=EU Country/Region Code;
+                                                              ENG=EU Country/Region Code] }
+    { 7   ;   ;Intrastat Code      ;Code10        ;CaptionML=[ENU=Intrastat Code;
+                                                              ENG=Intrastat Code] }
+    { 8   ;   ;Address Format      ;Option        ;InitValue=City+Post Code;
+                                                   CaptionML=[ENU=Address Format;
+                                                              ENG=Address Format];
+                                                   OptionCaptionML=[ENU=Post Code+City,City+Post Code,City+County+Post Code,Blank Line+Post Code+City,City+County+Post Code On Seperate lines;
+                                                                    ENG=Post Code+City,City+Post Code,City+County+Post Code,Blank Line+Post Code+City,City+County+Post Code On Seperate lines];
+                                                   OptionString=Post Code+City,City+Post Code,City+County+Post Code,Blank Line+Post Code+City,City+County+Post Code On Seperate lines }
+    { 9   ;   ;Contact Address Format;Option      ;InitValue=After Company Name;
+                                                   CaptionML=[ENU=Contact Address Format;
+                                                              ENG=Contact Address Format];
+                                                   OptionCaptionML=[ENU=First,After Company Name,Last,After Company Name With City+County+Post Code on Seperate Lines;
+                                                                    ENG=First,After Company Name,Last,After Company Name With City+County+Post Code on Seperate Lines];
+                                                   OptionString=First,After Company Name,Last,After Company Name With City+County+Post Code on Seperate Lines }
+    { 50002;  ;Customer Template TRADE;Code10     ;TableRelation="Customer Template".Code;
+                                                   Description=CCS 101108 }
+    { 50003;  ;Dimension Value Code;Code20        ;OnValidate=VAR
+                                                                DimensionValue@1040000 : Record 349;
+                                                              BEGIN
+                                                                //AK 131108 -
+                                                                IF "Dimension Value Code" <> '' THEN BEGIN
+                                                                  GLSetup.GET();
+                                                                  GLSetup.TESTFIELD("Country Dimension Code");
+                                                                  DimensionValue.RESET;
+                                                                  DimensionValue.SETRANGE("Dimension Code",GLSetup."Country Dimension Code");
+                                                                  DimensionValue.FINDFIRST;
+                                                                END;
+                                                                //AK 131108 +
+                                                              END;
+
+                                                   OnLookup=VAR
+                                                              DimensionValue@1040000 : Record 349;
+                                                            BEGIN
+                                                              //AK 131108 -
+                                                              GLSetup.GET();
+                                                              GLSetup.TESTFIELD("Country Dimension Code");
+                                                              DimensionValue.RESET;
+                                                              DimensionValue.FILTERGROUP(2);
+                                                              DimensionValue.SETRANGE("Dimension Code",GLSetup."Country Dimension Code");
+                                                              DimensionValue.FILTERGROUP(0);
+                                                              IF FORM.RUNMODAL(0,DimensionValue) = ACTION::LookupOK THEN
+                                                                "Dimension Value Code" := DimensionValue.Code;
+                                                              //AK 131108 +
+                                                            END;
+
+                                                   Description=CCS 131108 }
+    { 50010;  ;Include PCA Results ;Boolean       ;CaptionML=[ENU=Include PCA Results;
+                                                              ENG=Include PCA Results];
+                                                   Description=OP12513 }
+    { 9021201;;Mandatory B2C Address Fields;Text250;
+                                                   Description=GW add 101213 }
+    { 9021202;;Mandatory B2B Address Fields;Text250;
+                                                   Description=GW add 101213 }
+    { 9021203;;Address Fields to Load Online;Text250;
+                                                   Description=GW add 101213 }
+    { 9021275;;B2C Customer Template;Code10       ;TableRelation="Customer Template";
+                                                   OnValidate=BEGIN
+                                                                VALIDATE("Use Online");
+                                                              END;
+                                                               }
+    { 9021276;;B2B Customer Template;Code10       ;TableRelation="Customer Template";
+                                                   OnValidate=BEGIN
+                                                                VALIDATE("Use Online");
+                                                              END;
+
+                                                   Description=GW add 130106 }
+    { 9021284;;Use Online          ;Boolean       ;OnValidate=BEGIN
+                                                                //MQ2.69 -
+                                                                //Original Code:
+                                                                //IF ("B2C Customer Template"='') AND ("Use Online"=TRUE) THEN
+                                                                //  ERROR(Text9021284,FIELDCAPTION("Use Online"),FIELDCAPTION("B2C Customer Template"));
+                                                                IF "Use Online"=TRUE THEN BEGIN
+                                                                  IF "B2C Customer Template"='' THEN BEGIN
+                                                                    IF CONFIRM(Text9021284,TRUE,FIELDCAPTION("Use Online"),FIELDCAPTION("B2C Customer Template")) THEN BEGIN
+                                                                      ERROR(Text9021285,FIELDCAPTION("Use Online"),FIELDCAPTION("B2C Customer Template"))
+                                                                    END ELSE BEGIN
+                                                                      MESSAGE(Text9021286,TABLECAPTION);
+                                                                    END;
+                                                                  END;
+                                                                  IF ("Address Fields to Load Online"='') THEN BEGIN
+                                                                    ERROR(Text9021287,FIELDCAPTION("Address Fields to Load Online"),FIELDCAPTION("Use Online"));
+                                                                  END;
+                                                                  IF ("Mandatory B2C Address Fields"='') AND ("Mandatory B2B Address Fields"='') THEN BEGIN
+                                                                    MESSAGE(Text9021288,FIELDCAPTION("Mandatory B2C Address Fields"),FIELDCAPTION("Mandatory B2B Address Fields"));
+                                                                  END;
+                                                                END;
+                                                                //MQ2.69 +
+                                                              END;
+                                                               }
+  }
+  KEYS
+  {
+    {    ;Code                                    ;Clustered=Yes }
+    {    ;EU Country/Region Code                   }
+    {    ;Intrastat Code                           }
+    {    ;Name                                     }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+    VAR
+      GLSetup@1040000 : Record 98;
+      Text9021284@1040005 : TextConst 'ENU=Does your web site allow B2C customer registration?;ENG=Does your web site allow B2C customer registration?';
+      Text9021285@1040004 : TextConst 'ENU=You cannot check the %1 field without assigning a %2 value when the site is used for B2C customer registration.;ENG=You cannot check the %1 field without assigning a %2 value when the site is used for B2C customer registration.';
+      Text9021286@1040003 : TextConst 'ENU=%1 set for use online;ENG=%1 set for use online';
+      Text9021287@1040002 : TextConst 'ENU=%1 cannot be blank when %2 is checked.;ENG=%1 cannot be blank when %2 is checked.';
+      Text9021288@1040001 : TextConst 'ENU=Warning: %1 and %2 are both blank!;ENG=Warning: %1 and %2 are both blank!';
+
+    BEGIN
+    {
+      //AK 260608 - Added options to Address Format and Contact Address Format field
+
+      MQ2.64 Add fields and text
+      MQ2.69 MA110917  Enhanced messages in "Use Online".OnValidate
+                       Renamed "Address Field To Load" to "Address Fields to Load Online"
+      MQ3.40 GW130106 Add field B2B Customer Template
+      //DOC OP12513 DB 19/02/2018 - Added field "Include PCA Results".
+    }
+    END.
+  }
+}
+
+OBJECT Table 79 Company Information
+{
+  OBJECT-PROPERTIES
+  {
+    Date=30/01/18;
+    Time=10:09:18;
+    Modified=Yes;
+    Version List=NAVW15.00,NAVGB4.00.01,OP12513;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=Company Information;
+               ENG=Company Information];
+  }
+  FIELDS
+  {
+    { 1   ;   ;Primary Key         ;Code10        ;CaptionML=[ENU=Primary Key;
+                                                              ENG=Primary Key] }
+    { 2   ;   ;Name                ;Text50        ;CaptionML=[ENU=Name;
+                                                              ENG=Name] }
+    { 3   ;   ;Name 2              ;Text50        ;CaptionML=[ENU=Name 2;
+                                                              ENG=Name 2] }
+    { 4   ;   ;Address             ;Text50        ;CaptionML=[ENU=Address;
+                                                              ENG=Address] }
+    { 5   ;   ;Address 2           ;Text50        ;CaptionML=[ENU=Address 2;
+                                                              ENG=Address 2] }
+    { 6   ;   ;City                ;Text30        ;OnValidate=BEGIN
+                                                                PostCode.ValidateCity(City,"Post Code");
+                                                              END;
+
+                                                   OnLookup=BEGIN
+                                                              PostCode.LookUpCity(City,"Post Code",TRUE);
+                                                            END;
+
+                                                   CaptionML=[ENU=City;
+                                                              ENG=City] }
+    { 7   ;   ;Phone No.           ;Text20        ;CaptionML=[ENU=Phone No.;
+                                                              ENG=Phone No.] }
+    { 8   ;   ;Phone No. 2         ;Text20        ;CaptionML=[ENU=Phone No. 2;
+                                                              ENG=Phone No. 2] }
+    { 9   ;   ;Telex No.           ;Text20        ;CaptionML=[ENU=Telex No.;
+                                                              ENG=Telex No.] }
+    { 10  ;   ;Fax No.             ;Text20        ;CaptionML=[ENU=Fax No.;
+                                                              ENG=Fax No.] }
+    { 11  ;   ;Giro No.            ;Text20        ;CaptionML=[ENU=Giro No.;
+                                                              ENG=Giro No.] }
+    { 12  ;   ;Bank Name           ;Text50        ;CaptionML=[ENU=Bank Name;
+                                                              ENG=Bank Name] }
+    { 13  ;   ;Bank Branch No.     ;Text20        ;CaptionML=[ENU=Bank Branch No.;
+                                                              ENG=Bank Sort Code] }
+    { 14  ;   ;Bank Account No.    ;Text30        ;CaptionML=[ENU=Bank Account No.;
+                                                              ENG=Bank Account No.] }
+    { 15  ;   ;Payment Routing No. ;Text20        ;CaptionML=[ENU=Payment Routing No.;
+                                                              ENG=Payment Routing No.] }
+    { 17  ;   ;Customs Permit No.  ;Text10        ;CaptionML=[ENU=Customs Permit No.;
+                                                              ENG=Customs Permit No.] }
+    { 18  ;   ;Customs Permit Date ;Date          ;CaptionML=[ENU=Customs Permit Date;
+                                                              ENG=Customs Permit Date] }
+    { 19  ;   ;VAT Registration No.;Text20        ;OnValidate=VAR
+                                                                VATRegNoFormat@1000 : Record 381;
+                                                              BEGIN
+                                                                VATRegNoFormat.Test("VAT Registration No.","Country/Region Code",'',DATABASE::"Company Information");
+                                                              END;
+
+                                                   CaptionML=[ENU=VAT Registration No.;
+                                                              ENG=VAT Registration No.] }
+    { 20  ;   ;Registration No.    ;Text20        ;CaptionML=[ENU=Registration No.;
+                                                              ENG=Registration No.] }
+    { 21  ;   ;Telex Answer Back   ;Text20        ;CaptionML=[ENU=Telex Answer Back;
+                                                              ENG=Telex Answer Back] }
+    { 22  ;   ;Ship-to Name        ;Text50        ;CaptionML=[ENU=Ship-to Name;
+                                                              ENG=Ship-to Name] }
+    { 23  ;   ;Ship-to Name 2      ;Text50        ;CaptionML=[ENU=Ship-to Name 2;
+                                                              ENG=Ship-to Name 2] }
+    { 24  ;   ;Ship-to Address     ;Text50        ;CaptionML=[ENU=Ship-to Address;
+                                                              ENG=Ship-to Address] }
+    { 25  ;   ;Ship-to Address 2   ;Text50        ;CaptionML=[ENU=Ship-to Address 2;
+                                                              ENG=Ship-to Address 2] }
+    { 26  ;   ;Ship-to City        ;Text30        ;OnValidate=BEGIN
+                                                                PostCode.ValidateCity("Ship-to City","Ship-to Post Code");
+                                                              END;
+
+                                                   OnLookup=BEGIN
+                                                              PostCode.LookUpCity("Ship-to City","Ship-to Post Code",TRUE);
+                                                            END;
+
+                                                   CaptionML=[ENU=Ship-to City;
+                                                              ENG=Ship-to City] }
+    { 27  ;   ;Ship-to Contact     ;Text50        ;CaptionML=[ENU=Ship-to Contact;
+                                                              ENG=Ship-to Contact] }
+    { 28  ;   ;Location Code       ;Code10        ;TableRelation=Location WHERE (Use As In-Transit=CONST(No));
+                                                   CaptionML=[ENU=Location Code;
+                                                              ENG=Location Code] }
+    { 29  ;   ;Picture             ;BLOB          ;CaptionML=[ENU=Picture;
+                                                              ENG=Picture];
+                                                   SubType=Bitmap }
+    { 30  ;   ;Post Code           ;Code20        ;TableRelation="Post Code";
+                                                   OnValidate=BEGIN
+                                                                PostCode.ValidatePostCode(City,"Post Code");
+                                                              END;
+
+                                                   OnLookup=BEGIN
+                                                              PostCode.LookUpPostCode(City,"Post Code",TRUE);
+                                                            END;
+
+                                                   ValidateTableRelation=No;
+                                                   TestTableRelation=No;
+                                                   CaptionML=[ENU=Post Code;
+                                                              ENG=Post Code] }
+    { 31  ;   ;County              ;Text30        ;CaptionML=[ENU=County;
+                                                              ENG=County] }
+    { 32  ;   ;Ship-to Post Code   ;Code20        ;TableRelation="Post Code";
+                                                   OnValidate=BEGIN
+                                                                PostCode.ValidatePostCode("Ship-to City","Ship-to Post Code");
+                                                              END;
+
+                                                   OnLookup=BEGIN
+                                                              PostCode.LookUpPostCode("Ship-to City","Ship-to Post Code",TRUE);
+                                                            END;
+
+                                                   ValidateTableRelation=No;
+                                                   TestTableRelation=No;
+                                                   CaptionML=[ENU=Ship-to Post Code;
+                                                              ENG=Ship-to Post Code] }
+    { 33  ;   ;Ship-to County      ;Text30        ;CaptionML=[ENU=Ship-to County;
+                                                              ENG=Ship-to County] }
+    { 34  ;   ;E-Mail              ;Text80        ;CaptionML=[ENU=E-Mail;
+                                                              ENG=E-Mail] }
+    { 35  ;   ;Home Page           ;Text80        ;CaptionML=[ENU=Home Page;
+                                                              ENG=Home Page] }
+    { 36  ;   ;Country/Region Code ;Code10        ;TableRelation=Country/Region;
+                                                   CaptionML=[ENU=Country/Region Code;
+                                                              ENG=Country/Region Code] }
+    { 37  ;   ;Ship-to Country/Region Code;Code10 ;TableRelation=Country/Region;
+                                                   CaptionML=[ENU=Ship-to Country/Region Code;
+                                                              ENG=Ship-to Country/Region Code] }
+    { 38  ;   ;IBAN                ;Code50        ;OnValidate=BEGIN
+                                                                CheckIBAN(IBAN);
+                                                              END;
+
+                                                   CaptionML=[ENU=IBAN;
+                                                              ENG=IBAN] }
+    { 39  ;   ;SWIFT Code          ;Code20        ;CaptionML=[ENU=SWIFT Code;
+                                                              ENG=SWIFT Code] }
+    { 40  ;   ;Industrial Classification;Text30   ;CaptionML=[ENU=Industrial Classification;
+                                                              ENG=Industrial Classification] }
+    { 41  ;   ;IC Partner Code     ;Code20        ;CaptionML=[ENU=IC Partner Code;
+                                                              ENG=IC Partner Code] }
+    { 42  ;   ;IC Inbox Type       ;Option        ;OnValidate=BEGIN
+                                                                IF "IC Inbox Type" = "IC Inbox Type"::Database THEN
+                                                                  "IC Inbox Details" := '';
+                                                              END;
+
+                                                   CaptionML=[ENU=IC Inbox Type;
+                                                              ENG=IC Inbox Type];
+                                                   OptionCaptionML=[ENU=File Location,Database;
+                                                                    ENG=File Location,Database];
+                                                   OptionString=File Location,Database }
+    { 43  ;   ;IC Inbox Details    ;Text250       ;OnLookup=VAR
+                                                              CmDlgMgt@1001 : Codeunit 412;
+                                                              i@1000 : Integer;
+                                                            BEGIN
+                                                              TESTFIELD("IC Partner Code");
+                                                              CASE "IC Inbox Type" OF
+                                                                "IC Inbox Type"::"File Location":
+                                                                  BEGIN
+                                                                    IF "IC Inbox Details" = '' THEN
+                                                                      "IC Inbox Details" := CmDlgMgt.OpenFile(Text001,STRSUBSTNO('%1.xml',"IC Partner Code"),4,'*.xml',1)
+                                                                    ELSE
+                                                                      "IC Inbox Details" :=
+                                                                        CmDlgMgt.OpenFile(Text001,"IC Inbox Details" + STRSUBSTNO('\%1.xml',"IC Partner Code"),4,'*.xml',1);
+                                                                    IF STRLEN("IC Inbox Details") > 4 THEN BEGIN
+                                                                        i := STRLEN("IC Inbox Details") - 4;
+                                                                        WHILE (i > 1) AND ("IC Inbox Details"[i] <> '\') DO
+                                                                          i := i - 1;
+                                                                        IF i > 1 THEN
+                                                                          "IC Inbox Details" := COPYSTR("IC Inbox Details",1,i - 1);
+                                                                      END;
+                                                                  END;
+                                                              END;
+                                                            END;
+
+                                                   CaptionML=[ENU=IC Inbox Details;
+                                                              ENG=IC Inbox Details] }
+    { 5700;   ;Responsibility Center;Code10       ;TableRelation="Responsibility Center".Code;
+                                                   ValidateTableRelation=Yes;
+                                                   CaptionML=[ENU=Responsibility Center;
+                                                              ENG=Responsibility Centre] }
+    { 5791;   ;Check-Avail. Period Calc.;DateFormula;
+                                                   CaptionML=[ENU=Check-Avail. Period Calc.;
+                                                              ENG=Check-Avail. Period Calc.] }
+    { 5792;   ;Check-Avail. Time Bucket;Option    ;CaptionML=[ENU=Check-Avail. Time Bucket;
+                                                              ENG=Check-Avail. Time Bucket];
+                                                   OptionCaptionML=[ENU=Day,Week,Month,Quarter,Year;
+                                                                    ENG=Day,Week,Month,Quarter,Year];
+                                                   OptionString=Day,Week,Month,Quarter,Year }
+    { 7600;   ;Base Calendar Code  ;Code10        ;TableRelation="Base Calendar";
+                                                   CaptionML=[ENU=Base Calendar Code;
+                                                              ENG=Base Calendar Code] }
+    { 7601;   ;Cal. Convergence Time Frame;DateFormula;
+                                                   InitValue=1Y;
+                                                   CaptionML=[ENU=Cal. Convergence Time Frame;
+                                                              ENG=Cal. Convergence Time Frame] }
+    { 10500;  ;Registered Name     ;Text50        ;CaptionML=[ENU=Registered Name;
+                                                              ENG=Registered Name] }
+    { 10501;  ;Registered Name 2   ;Text50        ;CaptionML=[ENU=Registered Name 2;
+                                                              ENG=Registered Name 2] }
+    { 10502;  ;Registered Address  ;Text50        ;CaptionML=[ENU=Registered Address;
+                                                              ENG=Registered Address] }
+    { 10503;  ;Registered Address 2;Text50        ;CaptionML=[ENU=Registered Address 2;
+                                                              ENG=Registered Address 2] }
+    { 10504;  ;Registered City     ;Text30        ;CaptionML=[ENU=Registered City;
+                                                              ENG=Registered City] }
+    { 10505;  ;Registered County   ;Text30        ;CaptionML=[ENU=Registered County;
+                                                              ENG=Registered County] }
+    { 10506;  ;Registered Post Code;Code20        ;TableRelation="Post Code";
+                                                   OnValidate=BEGIN
+                                                                IF PostCode.GET("Registered Post Code") THEN
+                                                                  "Registered City" := PostCode.City;
+                                                              END;
+
+                                                   ValidateTableRelation=No;
+                                                   TestTableRelation=No;
+                                                   CaptionML=[ENU=Registered Post Code;
+                                                              ENG=Registered Post Code] }
+    { 10507;  ;Branch Number       ;Text3         ;OnValidate=BEGIN
+                                                                IF STRLEN("Branch Number") < MAXSTRLEN("Branch Number") THEN
+                                                                  FIELDERROR("Branch Number",STRSUBSTNO(Text10500,MAXSTRLEN("Branch Number")));
+                                                              END;
+
+                                                   CaptionML=[ENU=Branch Number;
+                                                              ENG=Branch Number];
+                                                   CharAllowed=09 }
+    { 10508;  ;Contact Name        ;Text35        ;CaptionML=[ENU=Contact Name;
+                                                              ENG=Contact Name] }
+    { 50001;  ;Repeat Order Email Sender Name;Text30;
+                                                   Description=AK 230708 }
+    { 50002;  ;Repeat Order Email Sender Addr;Text100;
+                                                   CaptionML=ENG=Repeat Order Email Sender Address;
+                                                   Description=AK 230708 }
+    { 50003;  ;Color Code          ;Option        ;OptionString=[ ,Blue,Yellow] }
+    { 50004;  ;Biocare Limited     ;Boolean        }
+    { 50005;  ;Nutrigold Limited   ;Boolean        }
+    { 50006;  ;Totally Nourish Limited;Boolean     }
+    { 50007;  ;Education Phone No. ;Text80         }
+    { 50008;  ;Education Fax No.   ;Text80         }
+    { 50009;  ;Education Email     ;Text80         }
+    { 50010;  ;Purchase Department Email;Text80    }
+    { 50011;  ;Purchase Department Fax;Text80      }
+    { 50012;  ;Purchase Department Phone No.;Text80 }
+    { 50050;  ;Natural Wellbeing limited;Boolean  ;Description=TNP1.00 }
+    { 50051;  ;AhHa Publications Ltd;Boolean      ;Description=TB 161014 }
+    { 50060;  ;PCA Predict Key     ;Text80        ;Description=OP12513 }
+    { 50070;  ;PCA Account Code    ;Text30        ;Description=OP12513 }
+    { 50080;  ;PCA User Password   ;Text30        ;Description=OP12513 }
+  }
+  KEYS
+  {
+    {    ;Primary Key                             ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+    VAR
+      PostCode@1000 : Record 225;
+      Text000@1001 : TextConst 'ENU=The number you entered is not a valid IBAN.;ENG=The number you entered is not a valid IBAN.';
+      Text001@1002 : TextConst 'ENU=File Location for IC files;ENG=File Location for IC files';
+      Text10500@1040000 : TextConst 'ENU=must be a %1 digit numeric number;ENG=must be a %1 digit numeric number';
+
+    PROCEDURE CheckIBAN@1(IBANCode@1000 : Code[100]);
+    VAR
+      Modulus97@1001 : Integer;
+      I@1002 : Integer;
+    BEGIN
+      IF IBANCode = '' THEN
+        EXIT;
+      IBANCode := DELCHR(IBANCode);
+      Modulus97 := 97;
+      IF (STRLEN(IBANCode) <= 5) OR (STRLEN(IBANCode) > 34) THEN
+        IBANError;
+      ConvertIBAN(IBANCode);
+      WHILE STRLEN(IBANCode) > 6 DO
+        IBANCode := CalcModulus(COPYSTR(IBANCode,1,6),Modulus97) + COPYSTR(IBANCode,7);
+      EVALUATE(I,IBANCode);
+      IF (I MOD Modulus97) <> 1 THEN
+        IBANError;
+    END;
+
+    LOCAL PROCEDURE ConvertIBAN@4(VAR IBANCode@1000 : Code[100]);
+    VAR
+      I@1002 : Integer;
+    BEGIN
+      IBANCode := COPYSTR(IBANCode,5) + COPYSTR(IBANCode,1,4);
+      I := 0;
+      WHILE I < STRLEN(IBANCode) DO BEGIN
+        I := I + 1;
+        IF ConvertLetter(IBANCode,COPYSTR(IBANCode,I,1),I) THEN
+          I := 0;
+      END;
+    END;
+
+    LOCAL PROCEDURE CalcModulus@3(Number@1000 : Code[10];Modulus97@1001 : Integer) : Code[10];
+    VAR
+      I@1002 : Integer;
+    BEGIN
+      EVALUATE(I,Number);
+      I := I MOD Modulus97;
+      IF I = 0 THEN
+        EXIT('');
+      EXIT(FORMAT(I));
+    END;
+
+    LOCAL PROCEDURE ConvertLetter@5(VAR IBANCode@1000 : Code[100];Letter@1001 : Code[1];LetterPlace@1002 : Integer) : Boolean;
+    VAR
+      Letter2@1003 : Code[2];
+    BEGIN
+      IF (Letter >= 'A') AND (Letter <= 'Z') THEN BEGIN
+        CASE Letter OF
+          'A': Letter2 := '10';
+          'B': Letter2 := '11';
+          'C': Letter2 := '12';
+          'D': Letter2 := '13';
+          'E': Letter2 := '14';
+          'F': Letter2 := '15';
+          'G': Letter2 := '16';
+          'H': Letter2 := '17';
+          'I': Letter2 := '18';
+          'J': Letter2 := '19';
+          'K': Letter2 := '20';
+          'L': Letter2 := '21';
+          'M': Letter2 := '22';
+          'N': Letter2 := '23';
+          'O': Letter2 := '24';
+          'P': Letter2 := '25';
+          'Q': Letter2 := '26';
+          'R': Letter2 := '27';
+          'S': Letter2 := '28';
+          'T': Letter2 := '29';
+          'U': Letter2 := '30';
+          'V': Letter2 := '31';
+          'W': Letter2 := '32';
+          'X': Letter2 := '33';
+          'Y': Letter2 := '34';
+          'Z': Letter2 := '35';
+        END;
+        IF LetterPlace = 1 THEN
+          IBANCode := Letter2 + COPYSTR(IBANCode,2)
+        ELSE BEGIN
+          IF LetterPlace = STRLEN(IBANCode) THEN
+            IBANCode := COPYSTR(IBANCode,1,LetterPlace - 1) + Letter2
+          ELSE
+            IBANCode :=
+              COPYSTR(IBANCode,1,LetterPlace - 1) + Letter2 + COPYSTR(IBANCode,LetterPlace + 1);
+        END;
+        EXIT(TRUE);
+      END;
+      IF (Letter >= '0') AND (Letter <= '9') THEN
+        EXIT(FALSE);
+
+      IBANError;
+    END;
+
+    LOCAL PROCEDURE IBANError@12();
+    BEGIN
+      ERROR(Text000);
+    END;
+
+    PROCEDURE DisplayMap@7();
+    VAR
+      MapPoint@1001 : Record 800;
+      MapMgt@1000 : Codeunit 802;
+    BEGIN
+      IF MapPoint.FIND('-') THEN
+        MapMgt.MakeSelection(DATABASE::"Company Information",GETPOSITION);
+    END;
+
+    BEGIN
+    {
+      //DOC OP12513 DD 30/01/2018 - Added new fields "PCA Predict Key", "PCA User Name" and "PCA User Password"
+    }
+    END.
+  }
+}
+
+OBJECT Table 91 User Setup
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19/02/18;
+    Time=07:33:19;
+    Modified=Yes;
+    Version List=NAVW15.00,CustChg,OP12513;
+  }
+  PROPERTIES
+  {
+    OnModify=BEGIN
+               //aK 220209 +
+               //IF (UserSetup.GET(USERID)) AND (NOT UserSetup."Allow to Edit User Setup") THEN
+               //  ERROR(Text008);
+               //aK 220209 -
+             END;
+
+    OnDelete=BEGIN
+               //aK 220209 +
+               //IF (UserSetup.GET(USERID)) AND (NOT UserSetup."Allow to Edit User Setup") THEN
+               //  ERROR(Text008);
+               //aK 220209 -
+             END;
+
+    CaptionML=[ENU=User Setup;
+               ENG=User Setup];
+    LookupFormID=Form119;
+  }
+  FIELDS
+  {
+    { 1   ;   ;User ID             ;Code20        ;TableRelation=User;
+                                                   OnValidate=VAR
+                                                                LoginMgt@1000 : Codeunit 418;
+                                                              BEGIN
+                                                                LoginMgt.ValidateUserID("User ID");
+                                                              END;
+
+                                                   OnLookup=VAR
+                                                              LoginMgt@1000 : Codeunit 418;
+                                                            BEGIN
+                                                              LoginMgt.LookupUserID("User ID");
+                                                            END;
+
+                                                   ValidateTableRelation=No;
+                                                   TestTableRelation=No;
+                                                   CaptionML=[ENU=User ID;
+                                                              ENG=User ID];
+                                                   NotBlank=Yes }
+    { 2   ;   ;Allow Posting From  ;Date          ;OnValidate=BEGIN
+                                                                TESTFIELD("Do Not Update Start/End Date",FALSE);
+                                                              END;
+
+                                                   CaptionML=[ENU=Allow Posting From;
+                                                              ENG=Allow Posting From] }
+    { 3   ;   ;Allow Posting To    ;Date          ;OnValidate=BEGIN
+                                                                TESTFIELD("Do Not Update Start/End Date",FALSE);
+                                                              END;
+
+                                                   CaptionML=[ENU=Allow Posting To;
+                                                              ENG=Allow Posting To] }
+    { 4   ;   ;Register Time       ;Boolean       ;CaptionML=[ENU=Register Time;
+                                                              ENG=Register Time] }
+    { 10  ;   ;Salespers./Purch. Code;Code10      ;TableRelation=Salesperson/Purchaser.Code;
+                                                   OnValidate=VAR
+                                                                UserSetup@1000 : Record 91;
+                                                              BEGIN
+                                                                IF "Salespers./Purch. Code" <> '' THEN BEGIN
+                                                                  UserSetup.SETCURRENTKEY("Salespers./Purch. Code");
+                                                                  UserSetup.SETRANGE("Salespers./Purch. Code","Salespers./Purch. Code");
+                                                                  IF UserSetup.FIND('-') THEN
+                                                                    ERROR(Text001,"Salespers./Purch. Code",UserSetup."User ID");
+                                                                END;
+                                                              END;
+
+                                                   ValidateTableRelation=No;
+                                                   TestTableRelation=No;
+                                                   CaptionML=[ENU=Salespers./Purch. Code;
+                                                              ENG=Salespers./Purch. Code] }
+    { 11  ;   ;Approver ID         ;Code20        ;TableRelation="User Setup"."User ID";
+                                                   ValidateTableRelation=No;
+                                                   TestTableRelation=No;
+                                                   CaptionML=[ENU=Approver ID;
+                                                              ENG=Approver ID] }
+    { 12  ;   ;Sales Amount Approval Limit;Integer;OnValidate=BEGIN
+                                                                IF "Unlimited Sales Approval" AND ("Sales Amount Approval Limit" <> 0) THEN
+                                                                  ERROR(Text003,FIELDCAPTION("Sales Amount Approval Limit"),FIELDCAPTION("Unlimited Sales Approval"));
+                                                                IF "Sales Amount Approval Limit" < 0 THEN
+                                                                  ERROR(Text005);
+                                                              END;
+
+                                                   CaptionML=[ENU=Sales Amount Approval Limit;
+                                                              ENG=Sales Amount Approval Limit];
+                                                   BlankZero=Yes }
+    { 13  ;   ;Purchase Amount Approval Limit;Integer;
+                                                   OnValidate=BEGIN
+                                                                IF "Unlimited Purchase Approval" AND ("Purchase Amount Approval Limit" <> 0) THEN
+                                                                  ERROR(Text003,FIELDCAPTION("Purchase Amount Approval Limit"),FIELDCAPTION("Unlimited Purchase Approval"));
+                                                                IF "Purchase Amount Approval Limit" < 0 THEN
+                                                                  ERROR(Text005);
+                                                              END;
+
+                                                   CaptionML=[ENU=Purchase Amount Approval Limit;
+                                                              ENG=Purchase Amount Approval Limit];
+                                                   BlankZero=Yes }
+    { 14  ;   ;Unlimited Sales Approval;Boolean   ;OnValidate=BEGIN
+                                                                IF "Unlimited Sales Approval" THEN
+                                                                  "Sales Amount Approval Limit" := 0;
+                                                              END;
+
+                                                   CaptionML=[ENU=Unlimited Sales Approval;
+                                                              ENG=Unlimited Sales Approval] }
+    { 15  ;   ;Unlimited Purchase Approval;Boolean;OnValidate=BEGIN
+                                                                IF "Unlimited Purchase Approval" THEN
+                                                                  "Purchase Amount Approval Limit" := 0;
+                                                              END;
+
+                                                   CaptionML=[ENU=Unlimited Purchase Approval;
+                                                              ENG=Unlimited Purchase Approval] }
+    { 16  ;   ;Substitute          ;Code20        ;TableRelation="User Setup";
+                                                   CaptionML=[ENU=Substitute;
+                                                              ENG=Substitute] }
+    { 17  ;   ;E-Mail              ;Text100       ;CaptionML=[ENU=E-Mail;
+                                                              ENG=E-Mail] }
+    { 19  ;   ;Request Amount Approval Limit;Integer;
+                                                   OnValidate=BEGIN
+                                                                IF "Unlimited Request Approval" AND ("Request Amount Approval Limit" <> 0) THEN
+                                                                  ERROR(Text003,FIELDCAPTION("Request Amount Approval Limit"),FIELDCAPTION("Unlimited Request Approval"));
+                                                                IF "Request Amount Approval Limit" < 0 THEN
+                                                                  ERROR(Text005);
+                                                              END;
+
+                                                   CaptionML=[ENU=Request Amount Approval Limit;
+                                                              ENG=Request Amount Approval Limit];
+                                                   BlankZero=Yes }
+    { 20  ;   ;Unlimited Request Approval;Boolean ;OnValidate=BEGIN
+                                                                IF "Unlimited Request Approval" THEN
+                                                                  "Request Amount Approval Limit" := 0;
+                                                              END;
+
+                                                   CaptionML=[ENU=Unlimited Request Approval;
+                                                              ENG=Unlimited Request Approval] }
+    { 5600;   ;Allow FA Posting From;Date         ;CaptionML=[ENU=Allow FA Posting From;
+                                                              ENG=Allow FA Posting From] }
+    { 5601;   ;Allow FA Posting To ;Date          ;CaptionML=[ENU=Allow FA Posting To;
+                                                              ENG=Allow FA Posting To] }
+    { 5700;   ;Sales Resp. Ctr. Filter;Code10     ;TableRelation="Responsibility Center".Code;
+                                                   CaptionML=[ENU=Sales Resp. Ctr. Filter;
+                                                              ENG=Sales Resp. Ctr. Filter] }
+    { 5701;   ;Purchase Resp. Ctr. Filter;Code10  ;TableRelation="Responsibility Center";
+                                                   CaptionML=[ENU=Purchase Resp. Ctr. Filter;
+                                                              ENG=Purchase Resp. Ctr. Filter] }
+    { 5900;   ;Service Resp. Ctr. Filter;Code10   ;TableRelation="Responsibility Center";
+                                                   CaptionML=[ENU=Service Resp. Ctr. Filter;
+                                                              ENG=Service Resp. Ctr. Filter] }
+    { 50001;  ;Allow to Act/Dea Campaign;Boolean  ;CaptionML=ENG=Allow to Activate/De-activate Campaigns;
+                                                   Description=CCS1.0 }
+    { 50002;  ;Allow to View Card Details;Boolean ;CaptionML=ENG=Allow to View Customer Card Details;
+                                                   Description=CCS1.0 }
+    { 50003;  ;Allow to Change Shipping Agent;Boolean;
+                                                   CaptionML=ENG=Allowed to Change Shipping Agent;
+                                                   Description=CCS1.0 }
+    { 50097;  ;Handheld User       ;Boolean       ;Description=CCS1.0 }
+    { 50098;  ;Handheld USER ID    ;Integer       ;OnValidate=BEGIN
+                                                                TESTFIELD("Handheld User",TRUE);
+                                                                IF FORMAT("Handheld USER ID") <> '' THEN
+                                                                  IF STRLEN(FORMAT("Handheld USER ID")) <> 4 THEN
+                                                                    ERROR(Text006);
+                                                              END;
+
+                                                   MinValue=1;
+                                                   MaxValue=9999;
+                                                   Description=CCS1.0 }
+    { 50099;  ;Employee Code       ;Code20        ;TableRelation=Employee;
+                                                   Description=CCS1.0 }
+    { 50100;  ;Run Form            ;Integer       ;TableRelation=Object.ID WHERE (Type=CONST(Form));
+                                                   Description=CCS1.0 }
+    { 50101;  ;Allow Item Advance View;Boolean    ;CaptionML=ENG=Allow To View Item Advance Card;
+                                                   Description=CCS1.0 }
+    { 50102;  ;Allow to Reopen Orders;Boolean     ;CaptionML=ENG=Allow to Re-Open Orders;
+                                                   Description=CCS1.0 }
+    { 50103;  ;Allow to Void Card Payments;Boolean;CaptionML=ENG=Allow to Void Card Payments;
+                                                   Description=CCS1.0 }
+    { 50104;  ;Allow Item Basic View;Boolean      ;CaptionML=ENG=Allow To View Item Basic Card;
+                                                   Description=CCS1.0 }
+    { 50105;  ;Allow to Cancel Order;Boolean      ;Description=CCS1.0 }
+    { 50106;  ;Allow to Release/Re-open P/V/L;Boolean;
+                                                   CaptionML=ENG=Allow to Release/Re-open Promotion/ Vouchers/ Loyalty Points;
+                                                   Description=CCS1.0 }
+    { 50107;  ;Allow to amend Voucher Scheme;Boolean;
+                                                   Description=CCS1.0 }
+    { 50108;  ;Allow to amend Loyalty Scheme;Boolean;
+                                                   Description=CCS1.0 }
+    { 50109;  ;Allow to Setup/Delete Messages;Boolean;
+                                                   Description=CCS1.0 }
+    { 50110;  ;Allow to See All Items;Boolean     ;Description=CCS1.0 }
+    { 50111;  ;Allow to View Technical Comp.;Boolean;
+                                                   CaptionML=ENG=Allow to View Technical Complaint;
+                                                   Description=CCS1.0 }
+    { 50112;  ;Allow to Edit Item Card;Boolean    ;Description=CCS1.0 }
+    { 50113;  ;Allow to View Handheld List;Boolean;Description=CCS1.0 }
+    { 50114;  ;Allow to View Inv. Disc/Prices;Boolean;
+                                                   Description=CCS1.0 }
+    { 50115;  ;Allow to Run Update Back Order;Boolean;
+                                                   Description=CCS1.0 }
+    { 50116;  ;Allow to Run Payment Pooling;Boolean;
+                                                   CaptionML=ENG=Allow to Run Card Payment Pooling;
+                                                   Description=CCS1.0 }
+    { 50117;  ;Allow to Edit User Setup;Boolean   ;Description=CCS1.0 }
+    { 50118;  ;Do Not Update Start/End Date;Boolean;
+                                                   Description=CCS1.0 }
+    { 50119;  ;Allow to Post Purch. Invoice;Boolean;
+                                                   Description=CCS1.0 }
+    { 50120;  ;Sales Operator      ;Boolean       ;Description=CCS1.0 }
+    { 50121;  ;Date Filter         ;Date          ;FieldClass=FlowFilter;
+                                                   Description=CCS1.0 }
+    { 50134;  ;Allow Customer Advance View;Boolean;CaptionML=ENG=Allow To View Customer Advance Card;
+                                                   Description=CCS1.0 - 031109 }
+    { 50135;  ;Allow Customer Advance Edit;Boolean;CaptionML=ENG=Allow To Edit Customer Advance Card;
+                                                   Description=CCS1.0 - 031109 }
+    { 50150;  ;Allow PCA           ;Boolean       ;CaptionML=[ENU=Allow PCA;
+                                                              ENG=Allow PCA];
+                                                   Description=OP12513 }
+  }
+  KEYS
+  {
+    {    ;User ID                                 ;Clustered=Yes }
+    {    ;Salespers./Purch. Code                   }
+    {    ;Handheld USER ID                         }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+    VAR
+      Text001@1000 : TextConst 'ENU=The %1 Salesperson/Purchaser code is already assigned to another User ID %2.;ENG=The %1 Salesperson/Purchaser code is already assigned to another User ID %2.';
+      Text003@1002 : TextConst 'ENU="You cannot have both a %1 and %2. ";ENG="You cannot have both a %1 and %2. "';
+      Text004@1003 : TextConst 'ENU=The %1 User ID does not have a %2 assigned.;ENG=The %1 User ID does not have a %2 assigned.';
+      Text005@1004 : TextConst 'ENU=You cannot have approval limits less than zero.;ENG=You cannot have approval limits less than zero.';
+      Text006@1040000 : TextConst 'ENG=Handheld User ID must be 4 numeric chr.';
+      Text007@1040001 : TextConst 'ENG=Handheld User Password must be 4 numeric chr.';
+      UserSetup@1040002 : Record 91;
+      Text008@1040003 : TextConst 'ENG=You do not have permission to change user setup.';
+
+    BEGIN
+    {
+      //CCS AK 041108 - Key added [Handheld USER ID]
+      AK 031109 - Field added [Allow Customer Advance View], [Allow Customer Advance Edit]
+      //DOC OP12513 DB 19/02/2018 - Added field "Allow PCA"
+    }
+    END.
+  }
+}
+
+OBJECT Form 1 Company Information
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19/02/18;
+    Time=07:26:34;
+    Modified=Yes;
+    Version List=NAVW15.00,NAVGB4.00.01,OP12513;
+  }
+  PROPERTIES
+  {
+    Width=21670;
+    Height=7260;
+    CaptionML=[ENU=Company Information;
+               ENG=Company Information];
+    InsertAllowed=No;
+    DeleteAllowed=No;
+    SourceTable=Table79;
+    OnOpenForm=VAR
+                 MapMgt@1000 : Codeunit 802;
+               BEGIN
+                 RESET;
+                 IF NOT GET THEN BEGIN
+                   INIT;
+                   INSERT;
+                 END;
+
+                 IF NOT MapMgt.TestSetup THEN
+                   CurrForm.MapPoint.VISIBLE(FALSE);
+               END;
+
+  }
+  CONTROLS
+  {
+    { 1   ;TabControl   ;220  ;220  ;21230;6050 ;HorzGlue=Both;
+                                                 VertGlue=Both;
+                                                 PageNamesML=[ENU=General,Communication,Payments,Shipping,Statutory,Neutra Health;
+                                                              ENG=General,Communication,Payments,Shipping,Statutory,Neutra Health] }
+    { 2   ;TextBox      ;3850 ;990  ;5500 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr=Name }
+    { 3   ;Label        ;440  ;990  ;3300 ;440  ;ParentControl=2;
+                                                 InPage=0 }
+    { 4   ;TextBox      ;3850 ;1540 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr=Address }
+    { 5   ;Label        ;440  ;1540 ;3300 ;440  ;ParentControl=4;
+                                                 InPage=0 }
+    { 6   ;TextBox      ;3850 ;2090 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr="Address 2" }
+    { 7   ;Label        ;440  ;2090 ;3300 ;440  ;ParentControl=6;
+                                                 InPage=0 }
+    { 10  ;TextBox      ;3850 ;4290 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr="Phone No." }
+    { 11  ;Label        ;440  ;4290 ;3300 ;440  ;ParentControl=10;
+                                                 InPage=0 }
+    { 14  ;TextBox      ;3850 ;4950 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr="VAT Registration No." }
+    { 15  ;Label        ;440  ;4950 ;3300 ;440  ;ParentControl=14;
+                                                 InPage=0 }
+    { 34  ;TextBox      ;6710 ;3190 ;2640 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 NextControl=42;
+                                                 SourceExpr="Post Code" }
+    { 42  ;TextBox      ;3850 ;3740 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr="Country/Region Code" }
+    { 45  ;Label        ;440  ;3740 ;3300 ;440  ;ParentControl=42 }
+    { 76  ;TextBox      ;3850 ;5610 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr="Industrial Classification" }
+    { 77  ;Label        ;440  ;5610 ;3300 ;440  ;ParentControl=76 }
+    { 86  ;CommandButton;6710 ;3190 ;440  ;440  ;Name=MapPoint;
+                                                 ParentControl=1;
+                                                 InPage=0;
+                                                 ShowCaption=No;
+                                                 Bitmap=53;
+                                                 ToolTipML=[ENU=Display Map;
+                                                            ENG=Display Map];
+                                                 OnPush=BEGIN
+                                                          DisplayMap;
+                                                        END;
+                                                         }
+    { 1040000;TextBox   ;3850 ;2640 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr=City }
+    { 1040001;Label     ;440  ;2640 ;3300 ;440  ;ParentControl=1040000 }
+    { 1040002;TextBox   ;3850 ;3190 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 CaptionML=[ENU=County/Post Code;
+                                                            ENG=County/Post Code];
+                                                 NextControl=34;
+                                                 SourceExpr=County }
+    { 1040003;Label     ;440  ;3190 ;3300 ;440  ;ParentControl=1040002 }
+    { 33  ;PictureBox   ;9460 ;990  ;11660;5060 ;HorzGlue=Both;
+                                                 VertGlue=Both;
+                                                 ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr=Picture }
+    { 50  ;TextBox      ;3850 ;990  ;2750 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="Phone No." }
+    { 53  ;Label        ;440  ;990  ;3300 ;440  ;ParentControl=50 }
+    { 54  ;TextBox      ;3850 ;1540 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="Fax No." }
+    { 55  ;Label        ;440  ;1540 ;3300 ;440  ;ParentControl=54 }
+    { 56  ;TextBox      ;3850 ;2200 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="E-Mail" }
+    { 57  ;Label        ;440  ;2200 ;3300 ;440  ;ParentControl=56 }
+    { 58  ;TextBox      ;3850 ;2750 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="Home Page" }
+    { 59  ;Label        ;440  ;2750 ;3300 ;440  ;ParentControl=58 }
+    { 9   ;CommandButton;6710 ;2750 ;440  ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 ShowCaption=No;
+                                                 Bitmap=20;
+                                                 ToolTipML=[ENU=Hyperlink;
+                                                            ENG=Hyperlink];
+                                                 OnPush=BEGIN
+                                                          TESTFIELD("Home Page");
+                                                          HYPERLINK("Home Page");
+                                                        END;
+                                                         }
+    { 78  ;TextBox      ;3850 ;3960 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="IC Partner Code" }
+    { 12  ;CommandButton;6710 ;2200 ;440  ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 ShowCaption=No;
+                                                 Bitmap=21;
+                                                 ToolTipML=[ENU=New Mail Message;
+                                                            ENG=New Mail Message];
+                                                 OnPush=BEGIN
+                                                          Mail.OpenNewMessage("E-Mail");
+                                                        END;
+                                                         }
+    { 79  ;Label        ;440  ;3960 ;3300 ;440  ;ParentControl=78 }
+    { 80  ;TextBox      ;3850 ;4510 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="IC Inbox Type" }
+    { 81  ;Label        ;440  ;4510 ;3300 ;440  ;ParentControl=80 }
+    { 82  ;TextBox      ;3850 ;5060 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="IC Inbox Details" }
+    { 83  ;Label        ;440  ;5060 ;3300 ;440  ;ParentControl=82 }
+    { 1040026;TextBox   ;3850 ;3410 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="Telex No." }
+    { 1040027;Label     ;440  ;3410 ;3300 ;440  ;ParentControl=1040026 }
+    { 1040044;TextBox   ;13640;2750 ;6710 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="Education Email" }
+    { 1040047;Label     ;10230;2750 ;3300 ;440  ;ParentControl=1040044 }
+    { 1040045;TextBox   ;13640;2200 ;6710 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="Education Fax No." }
+    { 1040048;Label     ;10230;2200 ;3300 ;440  ;ParentControl=1040045 }
+    { 1040046;TextBox   ;13640;1650 ;6710 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="Education Phone No." }
+    { 1040049;Label     ;10230;1650 ;3300 ;440  ;ParentControl=1040046 }
+    { 1040050;Label     ;10230;1100 ;3300 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 ForeColor=16777215;
+                                                 BackColor=8421504;
+                                                 BackTransparent=No;
+                                                 FontBold=Yes;
+                                                 LeaderDots=No;
+                                                 CaptionML=ENG=Education }
+    { 16  ;TextBox      ;3850 ;990  ;5500 ;440  ;ParentControl=1;
+                                                 InPage=2;
+                                                 SourceExpr="Bank Name" }
+    { 17  ;Label        ;440  ;990  ;3300 ;440  ;ParentControl=16 }
+    { 22  ;TextBox      ;3850 ;2640 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=2;
+                                                 SourceExpr="Payment Routing No." }
+    { 23  ;Label        ;440  ;2640 ;3300 ;440  ;ParentControl=22 }
+    { 24  ;TextBox      ;3850 ;3300 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=2;
+                                                 SourceExpr="Giro No." }
+    { 25  ;Label        ;440  ;3300 ;3300 ;440  ;ParentControl=24 }
+    { 20  ;TextBox      ;3850 ;2090 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=2;
+                                                 SourceExpr="Bank Account No." }
+    { 21  ;Label        ;440  ;2090 ;3300 ;440  ;ParentControl=20 }
+    { 18  ;TextBox      ;3850 ;1540 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=2;
+                                                 SourceExpr="Bank Branch No." }
+    { 19  ;Label        ;440  ;1540 ;3300 ;440  ;ParentControl=18 }
+    { 72  ;TextBox      ;3850 ;3960 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=2;
+                                                 SourceExpr="SWIFT Code" }
+    { 73  ;Label        ;440  ;3960 ;3300 ;440  ;ParentControl=72 }
+    { 74  ;TextBox      ;3850 ;4510 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=2;
+                                                 SourceExpr=IBAN }
+    { 75  ;Label        ;440  ;4510 ;3300 ;440  ;ParentControl=74 }
+    { 47  ;TextBox      ;12980;990  ;2750 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Location Code" }
+    { 48  ;Label        ;9570 ;990  ;3300 ;440  ;ParentControl=47 }
+    { 35  ;TextBox      ;3850 ;990  ;5500 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Ship-to Name" }
+    { 36  ;Label        ;440  ;990  ;3300 ;440  ;ParentControl=35 }
+    { 37  ;TextBox      ;3850 ;1540 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Ship-to Address" }
+    { 38  ;Label        ;440  ;1540 ;3300 ;440  ;ParentControl=37 }
+    { 39  ;TextBox      ;3850 ;2090 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Ship-to Address 2" }
+    { 40  ;Label        ;440  ;2090 ;3300 ;440  ;ParentControl=39 }
+    { 43  ;TextBox      ;3850 ;4400 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Ship-to Contact" }
+    { 44  ;Label        ;440  ;4400 ;3300 ;440  ;ParentControl=43 }
+    { 51  ;TextBox      ;6710 ;3190 ;2640 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 NextControl=60;
+                                                 SourceExpr="Ship-to Post Code" }
+    { 13  ;TextBox      ;12980;1540 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Responsibility Center" }
+    { 41  ;Label        ;9570 ;1540 ;3300 ;440  ;ParentControl=13 }
+    { 60  ;TextBox      ;3850 ;3740 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Ship-to Country/Region Code" }
+    { 61  ;Label        ;440  ;3740 ;3300 ;440  ;ParentControl=60 }
+    { 62  ;TextBox      ;12980;2090 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Check-Avail. Period Calc." }
+    { 63  ;Label        ;9570 ;2090 ;3300 ;440  ;ParentControl=62 }
+    { 64  ;TextBox      ;12980;2640 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Check-Avail. Time Bucket" }
+    { 1040004;TextBox   ;3850 ;2640 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Ship-to City" }
+    { 65  ;Label        ;9570 ;2640 ;3300 ;440  ;ParentControl=64 }
+    { 1040005;Label     ;440  ;2640 ;3300 ;440  ;ParentControl=1040004 }
+    { 67  ;TextBox      ;12980;3190 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 DrillDown=No;
+                                                 SourceExpr="Base Calendar Code" }
+    { 1040006;TextBox   ;3850 ;3190 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 CaptionML=[ENU=Ship-to County/Post Code;
+                                                            ENG=Ship-to County/Post Code];
+                                                 NextControl=51;
+                                                 SourceExpr="Ship-to County" }
+    { 68  ;Label        ;9570 ;3190 ;3300 ;440  ;ParentControl=67 }
+    { 1040007;Label     ;440  ;3190 ;3300 ;440  ;ParentControl=1040006 }
+    { 69  ;TextBox      ;12980;3740 ;1700 ;440  ;Name=Customized Calendar;
+                                                 Editable=No;
+                                                 ParentControl=1;
+                                                 InPage=3;
+                                                 DrillDown=Yes;
+                                                 CaptionML=[ENU=Customized Calendar;
+                                                            ENG=Customized Calendar];
+                                                 SourceExpr=CalendarMgmt.CustomizedCalendarExistText(CustomizedCalendar."Source Type"::Company,'','',"Base Calendar Code");
+                                                 OnDrillDown=BEGIN
+                                                               CurrForm.SAVERECORD;
+                                                               TESTFIELD("Base Calendar Code");
+                                                               CalendarMgmt.ShowCustomizedCalendar(CustomizedCalEntry."Source Type"::Company,'','',"Base Calendar Code");
+                                                             END;
+                                                              }
+    { 71  ;Label        ;9570 ;3740 ;3300 ;440  ;ParentControl=69;
+                                                 InPage=3;
+                                                 CaptionML=[ENU=Customized Calendar;
+                                                            ENG=Customized Calendar] }
+    { 84  ;TextBox      ;12980;4290 ;1700 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Cal. Convergence Time Frame" }
+    { 85  ;Label        ;9570 ;4290 ;3300 ;440  ;ParentControl=84 }
+    { 1040008;TextBox   ;3850 ;3740 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 CaptionML=[ENU=Registered County/Post Code;
+                                                            ENG=Registered County/Post Code];
+                                                 SourceExpr="Registered County" }
+    { 1040014;Label     ;440  ;3740 ;3300 ;440  ;ParentControl=1040008 }
+    { 1040009;TextBox   ;6710 ;3740 ;2640 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 SourceExpr="Registered Post Code" }
+    { 1040010;TextBox   ;3850 ;3190 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 SourceExpr="Registered City" }
+    { 1040013;Label     ;440  ;3190 ;3300 ;440  ;ParentControl=1040010 }
+    { 1040011;TextBox   ;3850 ;2640 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 SourceExpr="Registered Address 2" }
+    { 1040012;Label     ;440  ;2640 ;3300 ;440  ;ParentControl=1040011 }
+    { 1040015;TextBox   ;3850 ;2090 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 SourceExpr="Registered Address" }
+    { 1040016;Label     ;440  ;2090 ;3300 ;440  ;ParentControl=1040015 }
+    { 1040017;TextBox   ;3850 ;1540 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 SourceExpr="Registered Name" }
+    { 1040018;Label     ;440  ;1540 ;3300 ;440  ;ParentControl=1040017 }
+    { 1040019;TextBox   ;3850 ;990  ;2750 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 SourceExpr="Registration No." }
+    { 1040020;Label     ;440  ;990  ;3300 ;440  ;ParentControl=1040019 }
+    { 1101100000;TextBox;3850 ;4400 ;1320 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 SourceExpr="Branch Number" }
+    { 1101100001;Label  ;440  ;4400 ;3300 ;440  ;ParentControl=1101100000 }
+    { 1101100002;TextBox;3850 ;4950 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 SourceExpr="Contact Name" }
+    { 1101100003;Label  ;440  ;4950 ;3300 ;440  ;ParentControl=1101100002 }
+    { 1040021;TextBox   ;5170 ;1540 ;3960 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 SourceExpr="Repeat Order Email Sender Name" }
+    { 1040022;Label     ;440  ;1540 ;4620 ;440  ;ParentControl=1040021 }
+    { 1040023;TextBox   ;5170 ;2090 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 SourceExpr="Repeat Order Email Sender Addr" }
+    { 1040024;Label     ;440  ;2090 ;4620 ;440  ;ParentControl=1040023 }
+    { 1040025;Label     ;440  ;990  ;3300 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 ForeColor=16777215;
+                                                 BackColor=8421504;
+                                                 BackTransparent=No;
+                                                 FontBold=Yes;
+                                                 LeaderDots=No;
+                                                 CaptionML=ENG=Repeat Order Email }
+    { 1040028;TextBox   ;5170 ;3410 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 SourceExpr="Color Code" }
+    { 1040029;Label     ;440  ;3410 ;4620 ;440  ;ParentControl=1040028 }
+    { 1040030;Label     ;440  ;2860 ;3300 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 ForeColor=16777215;
+                                                 BackColor=8421504;
+                                                 BackTransparent=No;
+                                                 FontBold=Yes;
+                                                 LeaderDots=No;
+                                                 CaptionML=ENG=General }
+    { 1040038;TextBox   ;5170 ;3960 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 SourceExpr="Purchase Department Email" }
+    { 1040039;Label     ;440  ;3960 ;4620 ;440  ;ParentControl=1040038 }
+    { 1040040;TextBox   ;5170 ;4510 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 SourceExpr="Purchase Department Fax" }
+    { 1040041;Label     ;440  ;4510 ;4620 ;440  ;ParentControl=1040040 }
+    { 1040042;TextBox   ;5170 ;5060 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 SourceExpr="Purchase Department Phone No." }
+    { 1040043;Label     ;440  ;5060 ;4620 ;440  ;ParentControl=1040042 }
+    { 1040035;TextBox   ;15510;1430 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 SourceExpr="PCA Predict Key" }
+    { 1040036;Label     ;12100;1430 ;3300 ;440  ;ParentControl=1040035 }
+    { 1040037;Label     ;12100;880  ;3300 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 ForeColor=16777215;
+                                                 BackColor=8421504;
+                                                 BackTransparent=No;
+                                                 FontBold=Yes;
+                                                 LeaderDots=No;
+                                                 CaptionML=[ENU=PCA Predict;
+                                                            ENG=PCA Predict] }
+    { 26  ;CommandButton;9570 ;6490 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Default=Yes;
+                                                 PushAction=LookupOK;
+                                                 InvalidActionAppearance=Hide }
+    { 27  ;CommandButton;11990;6490 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Cancel=Yes;
+                                                 PushAction=LookupCancel;
+                                                 InvalidActionAppearance=Hide }
+    { 32  ;CommandButton;19250;6490 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 PushAction=FormHelp }
+    { 28  ;MenuButton   ;16830;6490 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 CaptionML=[ENU=&Picture;
+                                                            ENG=&Picture];
+                                                 Menu=MENUITEMS
+                                                 {
+                                                   { ID=29;
+                                                     Ellipsis=Yes;
+                                                     CaptionML=[ENU=Import;
+                                                                ENG=Import];
+                                                     OnPush=BEGIN
+                                                              PictureExists := Picture.HASVALUE;
+                                                              IF Picture.IMPORT('*.BMP',TRUE) = '' THEN
+                                                                EXIT;
+                                                              IF PictureExists THEN
+                                                                IF NOT CONFIRM(Text001,FALSE) THEN
+                                                                  EXIT;
+                                                              CurrForm.SAVERECORD;
+                                                            END;
+                                                             }
+                                                   { ID=30;
+                                                     Ellipsis=Yes;
+                                                     CaptionML=[ENU=E&xport;
+                                                                ENG=E&xport];
+                                                     OnPush=BEGIN
+                                                              IF Picture.HASVALUE THEN
+                                                                Picture.EXPORT('*.BMP',TRUE);
+                                                            END;
+                                                             }
+                                                   { ID=31;
+                                                     CaptionML=[ENU=Delete;
+                                                                ENG=Delete];
+                                                     OnPush=BEGIN
+                                                              IF Picture.HASVALUE THEN
+                                                                IF CONFIRM(Text002,FALSE) THEN BEGIN
+                                                                  CLEAR(Picture);
+                                                                  CurrForm.SAVERECORD;
+                                                                END;
+                                                            END;
+                                                             }
+                                                 }
+                                                  }
+    { 66  ;MenuButton   ;14410;6490 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 CaptionML=[ENU=&Company;
+                                                            ENG=&Company];
+                                                 Menu=MENUITEMS
+                                                 {
+                                                   { ID=70;
+                                                     PushAction=RunObject;
+                                                     CaptionML=[ENU=Responsibility Centers;
+                                                                ENG=Responsibility Centres];
+                                                     RunObject=Form 5714 }
+                                                 }
+                                                  }
+  }
+  CODE
+  {
+    VAR
+      Text001@1000 : TextConst 'ENU=Do you want to replace the existing picture?;ENG=Do you want to replace the existing picture?';
+      Text002@1001 : TextConst 'ENU=Do you want to delete the picture?;ENG=Do you want to delete the picture?';
+      CustomizedCalEntry@1007 : Record 7603;
+      CustomizedCalendar@1005 : Record 7602;
+      CalendarMgmt@1004 : Codeunit 7600;
+      Mail@1002 : Codeunit 397;
+      PictureExists@1003 : Boolean;
+
+    BEGIN
+    {
+      //DOC OP12513 DB 19/02/2018 - Added new field "PCA Predict Key"
+    }
+    END.
+  }
+}
+
+OBJECT Form 10 Countries/Regions
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19/02/18;
+    Time=13:03:01;
+    Modified=Yes;
+    Version List=NAVW15.00,MQ2.65,OP12513;
+  }
+  PROPERTIES
+  {
+    Width=13200;
+    Height=9570;
+    CaptionML=[ENU=Countries/Regions;
+               ENG=Countries/Regions];
+    TableBoxID=1;
+    SourceTable=Table9;
+    SourceTableView=SORTING(Name);
+    OnOpenForm=BEGIN
+                 CurrForm.EDITABLE(FALSE);
+               END;
+
+  }
+  CONTROLS
+  {
+    { 1   ;TableBox     ;220  ;220  ;12760;8580 ;HorzGlue=Both;
+                                                 VertGlue=Both;
+                                                 HeadingHeight=1210 }
+    { 2   ;TextBox      ;0    ;0    ;1650 ;0    ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr=Code }
+    { 3   ;Label        ;0    ;0    ;0    ;0    ;ParentControl=2;
+                                                 InColumnHeading=Yes }
+    { 4   ;TextBox      ;0    ;0    ;4400 ;0    ;HorzGlue=Both;
+                                                 ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr=Name }
+    { 5   ;Label        ;0    ;0    ;0    ;0    ;ParentControl=4;
+                                                 InColumnHeading=Yes }
+    { 1040011;TextBox   ;9313 ;5720 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="B2C Customer Template" }
+    { 1040012;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040011;
+                                                 InColumnHeading=Yes }
+    { 1040009;CheckBox  ;7329 ;2090 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Use Online" }
+    { 1040010;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040009;
+                                                 InColumnHeading=Yes }
+    { 1040002;TextBox   ;5980 ;4400 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Dimension Value Code" }
+    { 1040003;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040002;
+                                                 InColumnHeading=Yes }
+    { 1040004;TextBox   ;8024 ;2530 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Customer Template TRADE" }
+    { 1040005;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040004;
+                                                 InColumnHeading=Yes }
+    { 6   ;TextBox      ;0    ;0    ;2750 ;0    ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Address Format" }
+    { 7   ;Label        ;0    ;0    ;0    ;0    ;ParentControl=6;
+                                                 InColumnHeading=Yes }
+    { 15  ;TextBox      ;7541 ;440  ;2750 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Contact Address Format" }
+    { 16  ;Label        ;0    ;0    ;0    ;0    ;ParentControl=15;
+                                                 InColumnHeading=Yes }
+    { 11  ;TextBox      ;8599 ;770  ;1650 ;440  ;Visible=No;
+                                                 ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="EU Country/Region Code" }
+    { 12  ;Label        ;0    ;0    ;0    ;0    ;ParentControl=11;
+                                                 InColumnHeading=Yes }
+    { 13  ;TextBox      ;11139;660  ;1650 ;440  ;Visible=No;
+                                                 ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Intrastat Code" }
+    { 14  ;Label        ;0    ;0    ;0    ;0    ;ParentControl=13;
+                                                 InColumnHeading=Yes }
+    { 1040000;TextBox   ;19897;4620 ;4400 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Mandatory B2C Address Fields" }
+    { 1040001;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040000;
+                                                 InColumnHeading=Yes }
+    { 1040013;TextBox   ;24297;4620 ;4400 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Mandatory B2B Address Fields" }
+    { 1040014;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040013;
+                                                 InColumnHeading=Yes }
+    { 1040015;TextBox   ;28697;4620 ;4400 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Address Fields to Load Online" }
+    { 1040016;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040015;
+                                                 InColumnHeading=Yes }
+    { 1040017;CheckBox  ;34899;770  ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Include PCA Results" }
+    { 1040018;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040017;
+                                                 InColumnHeading=Yes }
+    { 8   ;CommandButton;3520 ;8910 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Default=Yes;
+                                                 PushAction=LookupOK;
+                                                 InvalidActionAppearance=Hide }
+    { 9   ;CommandButton;5940 ;8910 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Cancel=Yes;
+                                                 PushAction=LookupCancel;
+                                                 InvalidActionAppearance=Hide }
+    { 10  ;CommandButton;10780;8910 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 PushAction=FormHelp }
+    { 17  ;MenuButton   ;8360 ;8910 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 CaptionML=[ENU=&Country/Region;
+                                                            ENG=&Country/Region];
+                                                 Menu=MENUITEMS
+                                                 {
+                                                   { ID=18;
+                                                     PushAction=RunObject;
+                                                     CaptionML=[ENU=VAT Reg. No. Formats;
+                                                                ENG=VAT Reg. No. Formats];
+                                                     RunObject=Form 575;
+                                                     RunFormLinkType=OnUpdate;
+                                                     RunFormLink=Country/Region Code=FIELD(Code) }
+                                                   { ID=1040007;
+                                                     MenuItemType=Separator }
+                                                   { ID=1040008;
+                                                     ShortCutKey=F2;
+                                                     CaptionML=ENG=Edit;
+                                                     OnPush=BEGIN
+                                                              //AK 031008 -
+                                                              CurrForm.EDITABLE(NOT CurrForm.EDITABLE);
+                                                              CurrForm.UPDATE;
+                                                              //AK 031008 +
+                                                            END;
+                                                             }
+                                                 }
+                                                  }
+    { 1040006;CommandButton;220;8910;440  ;550  ;HorzGlue=Left;
+                                                 VertGlue=Bottom;
+                                                 Bitmap=7;
+                                                 CaptionML=ENG=Edit;
+                                                 ToolTipML=ENG=Press to toggle edit;
+                                                 OnPush=VAR
+                                                          ObjectType@1000000002 : 'Form,Report,Codeunit,Dataport';
+                                                        BEGIN
+                                                          //AK 031008 -
+                                                          CurrForm.EDITABLE(NOT CurrForm.EDITABLE);
+                                                          CurrForm.UPDATE;
+                                                          //AK 031008 +
+                                                        END;
+                                                         }
+  }
+  CODE
+  {
+
+    BEGIN
+    {
+      MQ2.0       Added fields "Use Online" and "B2C Customer Template"
+      MQ2.65      Added fields
+                    "Mandatory B2C Address Fields"
+                    "Mandatory B2B Address Fields"
+                    "Address Field To Load"
+      //DOC OP12513 DB 19/02/2018 - Added field "Include PCA Results".
+    }
+    END.
+  }
+}
+
+OBJECT Form 119 User Setup
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19/02/18;
+    Time=07:33:03;
+    Modified=Yes;
+    Version List=NAVW14.00,CustChg,OP12513;
+  }
+  PROPERTIES
+  {
+    Width=17930;
+    Height=9900;
+    CaptionML=[ENU=User Setup;
+               ENG=User Setup];
+    TableBoxID=1;
+    SourceTable=Table91;
+    OnOpenForm=BEGIN
+                 CurrForm.EDITABLE(FALSE);
+                 IF (UserSetup.GET(USERID))  AND (UserSetup."Allow to Edit User Setup") THEN
+                   CurrForm.EDITABLE(TRUE);
+                 ApplyColor();
+               END;
+
+  }
+  CONTROLS
+  {
+    { 1   ;TableBox     ;220  ;220  ;17490;8690 ;HorzGlue=Both;
+                                                 VertGlue=Both;
+                                                 HeadingHeight=1320;
+                                                 InlineEditing=Yes }
+    { 2   ;TextBox      ;0    ;0    ;1650 ;0    ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="User ID" }
+    { 3   ;Label        ;0    ;0    ;0    ;0    ;ParentControl=2;
+                                                 InColumnHeading=Yes }
+    { 1040014;TextBox   ;1852 ;2750 ;4400 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="E-Mail" }
+    { 1040015;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040014;
+                                                 InColumnHeading=Yes }
+    { 1040035;TextBox   ;6032 ;3080 ;2420 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Salespers./Purch. Code" }
+    { 1040036;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040035;
+                                                 InColumnHeading=Yes }
+    { 4   ;TextBox      ;0    ;0    ;1650 ;0    ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Allow Posting From" }
+    { 5   ;Label        ;0    ;0    ;0    ;0    ;ParentControl=4;
+                                                 InColumnHeading=Yes }
+    { 6   ;TextBox      ;0    ;0    ;1650 ;0    ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Allow Posting To" }
+    { 7   ;Label        ;0    ;0    ;0    ;0    ;ParentControl=6;
+                                                 InColumnHeading=Yes }
+    { 8   ;CheckBox     ;6904 ;0    ;1100 ;0    ;Visible=No;
+                                                 ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Register Time" }
+    { 9   ;Label        ;0    ;0    ;0    ;0    ;ParentControl=8;
+                                                 InColumnHeading=Yes }
+    { 15  ;TextBox      ;7752 ;330  ;1650 ;440  ;Visible=No;
+                                                 ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Sales Resp. Ctr. Filter" }
+    { 16  ;Label        ;0    ;0    ;0    ;0    ;ParentControl=15;
+                                                 InColumnHeading=Yes }
+    { 17  ;TextBox      ;8705 ;440  ;1650 ;440  ;Visible=No;
+                                                 ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Purchase Resp. Ctr. Filter" }
+    { 18  ;Label        ;0    ;0    ;0    ;0    ;ParentControl=17;
+                                                 InColumnHeading=Yes }
+    { 21  ;TextBox      ;11986;770  ;1650 ;440  ;Visible=No;
+                                                 ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Service Resp. Ctr. Filter" }
+    { 22  ;Label        ;0    ;0    ;0    ;0    ;ParentControl=21;
+                                                 InColumnHeading=Yes }
+    { 1040000;CheckBox  ;4920 ;2090 ;1980 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Act/Dea Campaign" }
+    { 1040001;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040000;
+                                                 InColumnHeading=Yes }
+    { 1040027;CheckBox  ;19735;3520 ;2640 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Release/Re-open P/V/L" }
+    { 1040028;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040027;
+                                                 InColumnHeading=Yes }
+    { 1040029;CheckBox  ;22375;3520 ;2420 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to amend Voucher Scheme" }
+    { 1040030;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040029;
+                                                 InColumnHeading=Yes }
+    { 1040031;CheckBox  ;21330;3520 ;2090 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to amend Loyalty Scheme" }
+    { 1040032;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040031;
+                                                 InColumnHeading=Yes }
+    { 1040002;CheckBox  ;23420;5500 ;2200 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Change Shipping Agent" }
+    { 1040003;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040002;
+                                                 InColumnHeading=Yes }
+    { 1040008;CheckBox  ;16034;3300 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Reopen Orders" }
+    { 1040009;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040008;
+                                                 InColumnHeading=Yes }
+    { 1040025;CheckBox  ;27226;4290 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Cancel Order" }
+    { 1040026;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040025;
+                                                 InColumnHeading=Yes }
+    { 1040017;CheckBox  ;30774;3300 ;3300 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 CaptionML=ENG=Allow to View Customer Credit Card Payment Details;
+                                                 SourceExpr="Allow to View Card Details" }
+    { 1040018;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040017;
+                                                 InColumnHeading=Yes }
+    { 1040019;CheckBox  ;34074;2310 ;2640 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 CaptionML=ENG=Allow to Void Credit Card Payments;
+                                                 SourceExpr="Allow to Void Card Payments" }
+    { 1040020;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040019;
+                                                 InColumnHeading=Yes }
+    { 1040021;CheckBox  ;20135;2860 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow Item Basic View" }
+    { 1040022;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040021;
+                                                 InColumnHeading=Yes }
+    { 1040006;CheckBox  ;14976;2200 ;2177 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow Item Advance View" }
+    { 1040007;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040006;
+                                                 InColumnHeading=Yes }
+    { 1040041;CheckBox  ;42492;5170 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Edit Item Card" }
+    { 1040042;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040041;
+                                                 InColumnHeading=Yes }
+    { 1040037;CheckBox  ;39529;2970 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to See All Items" }
+    { 1040038;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040037;
+                                                 InColumnHeading=Yes }
+    { 1040039;CheckBox  ;40953;3410 ;2090 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to View Technical Comp." }
+    { 1040040;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040039;
+                                                 InColumnHeading=Yes }
+    { 1040033;CheckBox  ;36852;4290 ;2200 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Setup/Delete Messages" }
+    { 1040034;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040033;
+                                                 InColumnHeading=Yes }
+    { 1040045;CheckBox  ;49662;4400 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to View Inv. Disc/Prices" }
+    { 1040046;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040045;
+                                                 InColumnHeading=Yes }
+    { 1040043;CheckBox  ;49942;5610 ;2090 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to View Handheld List" }
+    { 1040044;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040043;
+                                                 InColumnHeading=Yes }
+    { 1040047;CheckBox  ;53314;3080 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Run Update Back Order" }
+    { 1040048;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040047;
+                                                 InColumnHeading=Yes }
+    { 1040049;CheckBox  ;55325;4730 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Run Payment Pooling" }
+    { 1040050;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040049;
+                                                 InColumnHeading=Yes }
+    { 1040051;CheckBox  ;56965;4180 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Post Purch. Invoice" }
+    { 1040052;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040051;
+                                                 InColumnHeading=Yes }
+    { 1040053;CheckBox  ;58976;3300 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow Customer Advance View" }
+    { 1040054;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040053;
+                                                 InColumnHeading=Yes }
+    { 1040055;CheckBox  ;60676;3300 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow Customer Advance Edit" }
+    { 1040056;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040055;
+                                                 InColumnHeading=Yes }
+    { 1040010;CheckBox  ;18283;4070 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Handheld User" }
+    { 1040011;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040010;
+                                                 InColumnHeading=Yes }
+    { 1040057;CheckBox  ;63791;770  ;1700 ;440  ;Visible=No;
+                                                 ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Edit User Setup" }
+    { 1040058;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040057;
+                                                 InColumnHeading=Yes }
+    { 1040012;TextBox   ;19983;4070 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Handheld USER ID" }
+    { 1040013;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040012;
+                                                 InColumnHeading=Yes }
+    { 1040004;TextBox   ;14526;2750 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Run Form" }
+    { 1040005;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040004;
+                                                 InColumnHeading=Yes }
+    { 1040059;CheckBox  ;69242;880  ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow PCA" }
+    { 1040060;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040059;
+                                                 InColumnHeading=Yes }
+    { 12  ;CommandButton;10670;9130 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Default=Yes;
+                                                 PushAction=LookupOK;
+                                                 InvalidActionAppearance=Hide }
+    { 13  ;CommandButton;13090;9130 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Cancel=Yes;
+                                                 PushAction=LookupCancel;
+                                                 InvalidActionAppearance=Hide }
+    { 14  ;CommandButton;15510;9130 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 PushAction=FormHelp }
+    { 1040016;Label     ;220  ;9130 ;3300 ;440  ;VertGlue=Bottom;
+                                                 ForeColor=8388608;
+                                                 FontBold=Yes;
+                                                 LeaderDots=No;
+                                                 CaptionML=ENG=(Press F2 for Edit) }
+    { 1040023;CommandButton;4950;9020;660 ;660  ;Name=CmdColorNutriGold;
+                                                 HorzGlue=Both;
+                                                 VertGlue=Top;
+                                                 Visible=No;
+                                                 Enabled=No;
+                                                 Focusable=No;
+                                                 FocusOnClick=No;
+                                                 ShowCaption=No;
+                                                 ForeColor=255;
+                                                 BackColor=65535;
+                                                 BackTransparent=No;
+                                                 Border=No }
+    { 1040024;CommandButton;4070;9020;660 ;660  ;Name=CmdColorBC;
+                                                 HorzGlue=Both;
+                                                 VertGlue=Top;
+                                                 Visible=No;
+                                                 Enabled=No;
+                                                 Focusable=No;
+                                                 FocusOnClick=No;
+                                                 ShowCaption=No;
+                                                 ForeColor=255;
+                                                 BackColor=16711680;
+                                                 BackTransparent=No;
+                                                 Border=No }
+  }
+  CODE
+  {
+    VAR
+      UserSetup@1040000 : Record 91;
+
+    PROCEDURE ApplyColor@1040000();
+    VAR
+      ComInfo@1040000 : Record 79;
+    BEGIN
+      //CCS 311008 -
+      ComInfo.GET();
+      CurrForm.CmdColorBC.XPOS := 0;
+      CurrForm.CmdColorBC.YPOS := 0;
+      CurrForm.CmdColorBC.WIDTH := CurrForm.WIDTH;
+      CurrForm.CmdColorBC.HEIGHT := 250;
+      CurrForm.CmdColorNutriGold.XPOS := 0;
+      CurrForm.CmdColorNutriGold.YPOS := 0;
+      CurrForm.CmdColorNutriGold.WIDTH := CurrForm.WIDTH;
+      CurrForm.CmdColorNutriGold.HEIGHT := 250;
+
+      CASE ComInfo."Color Code" OF
+        ComInfo."Color Code"::Blue: CurrForm.CmdColorBC.VISIBLE(TRUE);
+        ComInfo."Color Code"::Yellow:  CurrForm.CmdColorNutriGold.VISIBLE(TRUE);
+      END;
+      //CCS 311008 +
+    END;
+
+    BEGIN
+    {
+      //DOC OP12513 DB 19/02/2018 - Added field "Allow PCA"
+    }
+    END.
+  }
+}
+
+OBJECT Form 50220 Post Code Validation
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19/02/18;
+    Time=08:24:18;
+    Modified=Yes;
+    Version List=OP12513;
+  }
+  PROPERTIES
+  {
+    Width=9790;
+    Height=6710;
+    Editable=No;
+    TableBoxID=1000000000;
+    SourceTable=Table18;
+  }
+  CONTROLS
+  {
+    { 1000000000;TableBox;220 ;220  ;9350 ;5500 ;HorzGlue=Both;
+                                                 VertGlue=Both }
+    { 1000000001;TextBox;0    ;0    ;1700 ;0    ;ParentControl=1000000000;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Search Name" }
+    { 1000000002;Label  ;0    ;0    ;0    ;0    ;ParentControl=1000000001;
+                                                 InColumnHeading=Yes }
+    { 1000000003;TextBox;0    ;0    ;4400 ;0    ;HorzGlue=Both;
+                                                 ParentControl=1000000000;
+                                                 InColumn=Yes;
+                                                 SourceExpr=Address }
+    { 1000000004;Label  ;0    ;0    ;0    ;0    ;ParentControl=1000000003;
+                                                 InColumnHeading=Yes }
+    { 1040000;TextBox   ;5715 ;440  ;4400 ;440  ;ParentControl=1000000000;
+                                                 InColumn=Yes;
+                                                 SourceExpr=Name }
+    { 1040001;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040000;
+                                                 InColumnHeading=Yes }
+    { 1000000005;CommandButton;2530;5940;2200;550;
+                                                 HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Default=Yes;
+                                                 PushAction=LookupOK;
+                                                 InvalidActionAppearance=Hide }
+    { 1000000006;CommandButton;4950;5940;2200;550;
+                                                 HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Cancel=Yes;
+                                                 PushAction=LookupCancel;
+                                                 InvalidActionAppearance=Hide }
+    { 1000000007;CommandButton;7370;5940;2200;550;
+                                                 HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 PushAction=FormHelp }
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+
+OBJECT Codeunit 365 Format Address
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19/02/18;
+    Time=14:48:42;
+    Modified=Yes;
+    Version List=NAVW15.00.01,NAVGB4.00,CustChg,MQAL1.5,OP12513;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      GLSetup@1000 : Record 98;
+
+    PROCEDURE FormatAddr@1(VAR AddrArray@1000 : ARRAY [8] OF Text[90];Name@1001 : Text[90];Name2@1002 : Text[90];Contact@1003 : Text[90];Addr@1004 : Text[50];Addr2@1005 : Text[50];City@1006 : Text[50];PostCode@1007 : Code[20];County@1008 : Text[50];CountryCode@1009 : Code[10]);
+    VAR
+      Country@1010 : Record 9;
+      InsertText@1011 : Integer;
+      Index@1012 : Integer;
+      NameLineNo@1013 : Integer;
+      Name2LineNo@1014 : Integer;
+      AddrLineNo@1015 : Integer;
+      Addr2LineNo@1016 : Integer;
+      ContLineNo@1017 : Integer;
+      PostCodeCityLineNo@1018 : Integer;
+      CountyLineNo@1019 : Integer;
+      CountryLineNo@1020 : Integer;
+      Dummy@1021 : Text[50];
+      CityLineNo@1040000 : Integer;
+      FirstName@1040001 : Code[250];
+      SecondName@1040002 : Code[250];
+    BEGIN
+      CLEAR(AddrArray);
+
+      IF CountryCode = '' THEN BEGIN
+        GLSetup.GET;
+        CLEAR(Country);
+        Country."Address Format" := GLSetup."Local Address Format";
+        Country."Contact Address Format" := GLSetup."Local Cont. Addr. Format";
+      END ELSE
+        Country.GET(CountryCode);
+
+      CASE Country."Contact Address Format" OF
+        Country."Contact Address Format"::First:
+          BEGIN
+            NameLineNo := 2;
+            Name2LineNo := 3;
+            ContLineNo := 1;
+            AddrLineNo := 4;
+            Addr2LineNo := 5;
+            PostCodeCityLineNo := 6;
+            CountyLineNo := 7;
+            CountryLineNo := 8;
+          END;
+        Country."Contact Address Format"::"After Company Name":
+          BEGIN
+            NameLineNo := 1;
+            Name2LineNo := 2;
+            ContLineNo := 3;
+            AddrLineNo := 4;
+            Addr2LineNo := 5;
+            PostCodeCityLineNo := 6;
+            CountyLineNo := 7;
+            CountryLineNo := 8;
+          END;
+        Country."Contact Address Format"::Last:
+          BEGIN
+            NameLineNo := 1;
+            Name2LineNo := 2;
+            ContLineNo := 8;
+            AddrLineNo := 3;
+            Addr2LineNo := 4;
+            PostCodeCityLineNo := 5;
+            CountyLineNo := 6;
+            CountryLineNo := 7;
+          END;
+          //AK 260608 -
+        Country."Contact Address Format"::"After Company Name With City+County+Post Code on Seperate Lines":
+          BEGIN
+            NameLineNo := 1;
+            Name2LineNo := 2;
+            ContLineNo := 2;
+            AddrLineNo := 3;
+            Addr2LineNo := 4;
+            CityLineNo := 5;
+            CountyLineNo := 6;
+            PostCodeCityLineNo := 7;
+            CountryLineNo := 8;
+          END;
+          //AK 260608 +
+      END;
+
+      AddrArray[NameLineNo] := Name;
+      AddrArray[Name2LineNo] := Name2;
+      AddrArray[AddrLineNo] := Addr;
+      AddrArray[Addr2LineNo] := Addr2;
+
+      CASE Country."Address Format" OF
+        Country."Address Format"::"Post Code+City",
+          Country."Address Format"::"City+County+Post Code",
+          Country."Address Format"::"City+Post Code":
+          BEGIN
+            AddrArray[ContLineNo] := Contact;
+            GeneratePostCodeCity(AddrArray[PostCodeCityLineNo], AddrArray[CountyLineNo], City, PostCode, County, Country);
+            AddrArray[CountryLineNo] := Country.Name;
+            COMPRESSARRAY(AddrArray);
+          END;
+        //AK 260608 -
+        Country."Address Format"::"City+County+Post Code On Seperate lines":
+          BEGIN
+            AddrArray[ContLineNo] := Contact;
+            IF CityLineNo <> 0 THEN
+              AddrArray[CityLineNo] := City;
+            AddrArray[CountyLineNo] := County;
+            AddrArray[PostCodeCityLineNo] := PostCode;
+            AddrArray[CountryLineNo] := Country.Name;
+            COMPRESSARRAY(AddrArray);
+          END;
+        //AK 260608 +
+        Country."Address Format"::"Blank Line+Post Code+City":
+          BEGIN
+            IF ContLineNo < PostCodeCityLineNo THEN
+              AddrArray[ContLineNo] := Contact;
+            COMPRESSARRAY(AddrArray);
+
+            Index := 1;
+            InsertText := 1;
+            REPEAT
+              IF AddrArray[Index] = '' THEN BEGIN
+                CASE InsertText OF
+                  2: GeneratePostCodeCity(AddrArray[Index], Dummy, City, PostCode, County, Country);
+                  3: AddrArray[Index] := Country.Name;
+                  4:
+                    IF ContLineNo > PostCodeCityLineNo THEN
+                      AddrArray[Index] := Contact;
+                END;
+                InsertText := InsertText + 1;
+              END;
+              Index := Index + 1;
+            UNTIL Index = 9;
+          END;
+      END;
+
+      //AK 311208 -
+      IF AddrArray[1] = AddrArray[2] THEN BEGIN
+        AddrArray[2] := '';
+        COMPRESSARRAY(AddrArray);
+      END ELSE
+        IF UPPERCASE(AddrArray[1]) = UPPERCASE(AddrArray[2]) THEN BEGIN
+          AddrArray[2] := '';
+          COMPRESSARRAY(AddrArray);
+        END ELSE BEGIN
+          FirstName := AddrArray[1];
+          SecondName := AddrArray[2];
+          IF FirstName = SecondName THEN BEGIN
+            AddrArray[2] := '';
+            COMPRESSARRAY(AddrArray);
+          END
+        END;
+      //AK 311208 +
+    END;
+
+    PROCEDURE FormatPostCodeCity@30(VAR PostCodeCityText@1000 : Text[90];VAR CountyText@1001 : Text[50];City@1002 : Text[50];PostCode@1003 : Code[20];County@1004 : Text[50];CountryCode@1005 : Code[10]);
+    VAR
+      Country@1006 : Record 9;
+    BEGIN
+      CLEAR(PostCodeCityText);
+      CLEAR(CountyText);
+
+      IF CountryCode = '' THEN BEGIN
+        GLSetup.GET;
+        CLEAR(Country);
+        Country."Address Format" := GLSetup."Local Address Format";
+        Country."Contact Address Format" := GLSetup."Local Cont. Addr. Format";
+      END ELSE
+        Country.GET(CountryCode);
+
+      GeneratePostCodeCity(PostCodeCityText, CountyText, City, PostCode, County, Country);
+    END;
+
+    LOCAL PROCEDURE GeneratePostCodeCity@31(VAR PostCodeCityText@1000 : Text[90];VAR CountyText@1001 : Text[50];City@1002 : Text[50];PostCode@1003 : Code[20];County@1004 : Text[50];Country@1005 : Record 9);
+    BEGIN
+      CASE Country."Address Format" OF
+        Country."Address Format"::"Post Code+City":
+          BEGIN
+            IF PostCode <> '' THEN
+              PostCodeCityText := DELSTR(PostCode + ' ' + City,MAXSTRLEN(PostCodeCityText) + 1)
+            ELSE
+              PostCodeCityText := City;
+            CountyText := County;
+          END;
+        Country."Address Format"::"City+County+Post Code":
+          BEGIN
+            CountyText := PostCode;
+            IF City <> '' THEN BEGIN
+              PostCodeCityText := City;
+              IF County <> '' THEN
+                CountyText := DELSTR(County,MAXSTRLEN(CountyText) - STRLEN(PostCode) - 1) + ' ' + PostCode;
+              END ELSE
+              PostCodeCityText := County;
+          END;
+        Country."Address Format"::"City+Post Code":
+          BEGIN
+            IF PostCode <> '' THEN
+              PostCodeCityText := DELSTR(City,MAXSTRLEN(PostCodeCityText) - STRLEN(PostCode) - 1) + ', ' + PostCode
+            ELSE
+              PostCodeCityText := City;
+          END;
+        Country."Address Format"::"Blank Line+Post Code+City":
+          IF PostCode <> '' THEN
+            PostCodeCityText := DELSTR(PostCode + ' ' + City,MAXSTRLEN(PostCodeCityText) + 1)
+          ELSE
+            PostCodeCityText := City;
+      END;
+    END;
+
+    PROCEDURE Company@2(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR CompanyInfo@1001 : Record 79);
+    BEGIN
+      WITH CompanyInfo DO
+        FormatAddr(
+          AddrArray,Name,"Name 2",'',Address,"Address 2",
+          City,"Post Code",County,'');
+    END;
+
+    PROCEDURE Customer@3(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR Cust@1001 : Record 18);
+    BEGIN
+      WITH Cust DO
+        FormatAddr(
+          AddrArray,Name,"Name 2",Contact,Address,"Address 2",
+          City,"Post Code",County,"Country/Region Code");
+    END;
+
+    PROCEDURE Vendor@4(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR Vend@1001 : Record 23);
+    BEGIN
+      WITH Vend DO
+        FormatAddr(
+          AddrArray,Name,"Name 2",Contact,Address,"Address 2",
+          City,"Post Code",County,"Country/Region Code");
+    END;
+
+    PROCEDURE BankAcc@5(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR BankAcc@1001 : Record 270);
+    BEGIN
+      WITH BankAcc DO
+        FormatAddr(
+          AddrArray,Name,"Name 2",Contact,Address,"Address 2",
+          City,"Post Code",County,"Country/Region Code");
+    END;
+
+    PROCEDURE SalesHeaderSellTo@6(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR SalesHeader@1001 : Record 36);
+    BEGIN
+      WITH SalesHeader DO
+        FormatAddr(
+          AddrArray,"Sell-to Customer Name","Sell-to Customer Name 2","Sell-to Contact","Sell-to Address","Sell-to Address 2",
+          "Sell-to City","Sell-to Post Code","Sell-to County","Sell-to Country/Region Code");
+    END;
+
+    PROCEDURE SalesHeaderBillTo@7(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR SalesHeader@1001 : Record 36);
+    BEGIN
+      WITH SalesHeader DO
+        FormatAddr(
+          AddrArray,"Bill-to Name","Bill-to Name 2","Bill-to Contact","Bill-to Address","Bill-to Address 2",
+          "Bill-to City","Bill-to Post Code","Bill-to County","Bill-to Country/Region Code");
+    END;
+
+    PROCEDURE SalesHeaderShipTo@8(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR SalesHeader@1001 : Record 36);
+    BEGIN
+      WITH SalesHeader DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE PurchHeaderBuyFrom@9(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR PurchHeader@1001 : Record 38);
+    BEGIN
+      WITH PurchHeader DO
+        FormatAddr(
+          AddrArray,"Buy-from Vendor Name","Buy-from Vendor Name 2","Buy-from Contact","Buy-from Address","Buy-from Address 2",
+          "Buy-from City","Buy-from Post Code","Buy-from County","Buy-from Country/Region Code");
+    END;
+
+    PROCEDURE PurchHeaderPayTo@10(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR PurchHeader@1001 : Record 38);
+    BEGIN
+      WITH PurchHeader DO
+        FormatAddr(
+          AddrArray,"Pay-to Name","Pay-to Name 2","Pay-to Contact","Pay-to Address","Pay-to Address 2",
+          "Pay-to City","Pay-to Post Code","Pay-to County","Pay-to Country/Region Code");
+    END;
+
+    PROCEDURE PurchHeaderShipTo@11(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR PurchHeader@1001 : Record 38);
+    BEGIN
+      WITH PurchHeader DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE SalesShptSellTo@12(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR SalesShptHeader@1001 : Record 110);
+    BEGIN
+      WITH SalesShptHeader DO
+        FormatAddr(
+          AddrArray,"Sell-to Customer Name","Sell-to Customer Name 2","Sell-to Contact","Sell-to Address","Sell-to Address 2",
+          "Sell-to City","Sell-to Post Code","Sell-to County","Sell-to Country/Region Code");
+    END;
+
+    PROCEDURE SalesShptBillTo@13(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR SalesShptHeader@1001 : Record 110);
+    BEGIN
+      WITH SalesShptHeader DO
+        FormatAddr(
+          AddrArray,"Bill-to Name","Bill-to Name 2","Bill-to Contact","Bill-to Address","Bill-to Address 2",
+          "Bill-to City","Bill-to Post Code","Bill-to County","Bill-to Country/Region Code");
+    END;
+
+    PROCEDURE SalesShptShipTo@14(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR SalesShptHeader@1001 : Record 110);
+    BEGIN
+      WITH SalesShptHeader DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE SalesInvSellTo@15(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR SalesInvHeader@1001 : Record 112);
+    BEGIN
+      WITH SalesInvHeader DO
+        FormatAddr(
+          AddrArray,"Sell-to Customer Name","Sell-to Customer Name 2","Sell-to Contact","Sell-to Address","Sell-to Address 2",
+          "Sell-to City","Sell-to Post Code","Sell-to County","Sell-to Country/Region Code");
+    END;
+
+    PROCEDURE SalesInvBillTo@16(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR SalesInvHeader@1001 : Record 112);
+    BEGIN
+      WITH SalesInvHeader DO
+        FormatAddr(
+          AddrArray,"Bill-to Name","Bill-to Name 2","Bill-to Contact","Bill-to Address","Bill-to Address 2",
+          "Bill-to City", "Bill-to Post Code","Bill-to County","Bill-to Country/Region Code");
+    END;
+
+    PROCEDURE SalesInvShipTo@17(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR SalesInvHeader@1001 : Record 112);
+    BEGIN
+      WITH SalesInvHeader DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE SalesCrMemoSellTo@18(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR SalesCrMemoHeader@1001 : Record 114);
+    BEGIN
+      WITH SalesCrMemoHeader DO
+        FormatAddr(
+          AddrArray,"Sell-to Customer Name","Sell-to Customer Name 2","Sell-to Contact","Sell-to Address","Sell-to Address 2",
+          "Sell-to City","Sell-to Post Code","Sell-to County","Sell-to Country/Region Code");
+    END;
+
+    PROCEDURE SalesCrMemoBillTo@19(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR SalesCrMemoHeader@1001 : Record 114);
+    BEGIN
+      WITH SalesCrMemoHeader DO
+        FormatAddr(
+          AddrArray,"Bill-to Name","Bill-to Name 2","Bill-to Contact","Bill-to Address","Bill-to Address 2",
+          "Bill-to City","Bill-to Post Code","Bill-to County","Bill-to Country/Region Code");
+    END;
+
+    PROCEDURE SalesCrMemoShipTo@20(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR SalesCrMemoHeader@1001 : Record 114);
+    BEGIN
+      WITH SalesCrMemoHeader DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE SalesRcptSellTo@5803(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ReturnRcptHeader@1001 : Record 6660);
+    BEGIN
+      WITH ReturnRcptHeader DO
+        FormatAddr(
+          AddrArray,"Sell-to Customer Name","Sell-to Customer Name 2","Sell-to Contact","Sell-to Address","Sell-to Address 2",
+          "Sell-to City","Sell-to Post Code","Sell-to County","Sell-to Country/Region Code");
+    END;
+
+    PROCEDURE SalesRcptBillTo@5804(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ReturnRcptHeader@1001 : Record 6660);
+    BEGIN
+      WITH ReturnRcptHeader DO
+        FormatAddr(
+          AddrArray,"Bill-to Name","Bill-to Name 2","Bill-to Contact","Bill-to Address","Bill-to Address 2",
+          "Bill-to City","Bill-to Post Code","Bill-to County","Bill-to Country/Region Code");
+    END;
+
+    PROCEDURE SalesRcptShipTo@5805(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ReturnRcptHeader@1001 : Record 6660);
+    BEGIN
+      WITH ReturnRcptHeader DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE PurchRcptBuyFrom@21(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR PurchRcptHeader@1001 : Record 120);
+    BEGIN
+      WITH PurchRcptHeader DO
+        FormatAddr(
+          AddrArray,"Buy-from Vendor Name","Buy-from Vendor Name 2","Buy-from Contact","Buy-from Address","Buy-from Address 2",
+          "Buy-from City","Buy-from Post Code","Buy-from County","Buy-from Country/Region Code");
+    END;
+
+    PROCEDURE PurchRcptPayTo@22(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR PurchRcptHeader@1001 : Record 120);
+    BEGIN
+      WITH PurchRcptHeader DO
+        FormatAddr(
+          AddrArray,"Pay-to Name","Pay-to Name 2","Pay-to Contact","Pay-to Address","Pay-to Address 2",
+          "Pay-to City","Pay-to Post Code","Pay-to County","Pay-to Country/Region Code");
+    END;
+
+    PROCEDURE PurchRcptShipTo@23(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR PurchRcptHeader@1001 : Record 120);
+    BEGIN
+      WITH PurchRcptHeader DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE PurchInvBuyFrom@24(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR PurchInvHeader@1001 : Record 122);
+    BEGIN
+      WITH PurchInvHeader DO
+        FormatAddr(
+          AddrArray,"Buy-from Vendor Name","Buy-from Vendor Name 2","Buy-from Contact","Buy-from Address","Buy-from Address 2",
+          "Buy-from City","Buy-from Post Code","Buy-from County","Buy-from Country/Region Code");
+    END;
+
+    PROCEDURE PurchInvPayTo@25(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR PurchInvHeader@1001 : Record 122);
+    BEGIN
+      WITH PurchInvHeader DO
+        FormatAddr(
+          AddrArray,"Pay-to Name","Pay-to Name 2","Pay-to Contact","Pay-to Address","Pay-to Address 2",
+          "Pay-to City","Pay-to Post Code","Pay-to County","Pay-to Country/Region Code");
+    END;
+
+    PROCEDURE PurchInvShipTo@26(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR PurchInvHeader@1001 : Record 122);
+    BEGIN
+      WITH PurchInvHeader DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE PurchCrMemoBuyFrom@27(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR PurchCrMemoHeader@1001 : Record 124);
+    BEGIN
+      WITH PurchCrMemoHeader DO
+        FormatAddr(
+          AddrArray,"Buy-from Vendor Name","Buy-from Vendor Name 2","Buy-from Contact","Buy-from Address","Buy-from Address 2",
+          "Buy-from City","Buy-from Post Code","Buy-from County","Buy-from Country/Region Code");
+    END;
+
+    PROCEDURE PurchCrMemoPayTo@28(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR PurchCrMemoHeader@1001 : Record 124);
+    BEGIN
+      WITH PurchCrMemoHeader DO
+        FormatAddr(
+          AddrArray,"Pay-to Name","Pay-to Name 2","Pay-to Contact","Pay-to Address","Pay-to Address 2",
+          "Pay-to City","Pay-to Post Code","Pay-to County","Pay-to Country/Region Code");
+    END;
+
+    PROCEDURE PurchCrMemoShipTo@29(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR PurchCrMemoHeader@1001 : Record 124);
+    BEGIN
+      WITH PurchCrMemoHeader DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE PurchShptBuyFrom@5800(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ReturnShptHeader@1001 : Record 6650);
+    BEGIN
+      WITH ReturnShptHeader DO
+        FormatAddr(
+          AddrArray,"Buy-from Vendor Name","Buy-from Vendor Name 2","Buy-from Contact","Buy-from Address","Buy-from Address 2",
+          "Buy-from City","Buy-from Post Code","Buy-from County","Buy-from Country/Region Code");
+    END;
+
+    PROCEDURE PurchShptPayTo@5801(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ReturnShptHeader@1001 : Record 6650);
+    BEGIN
+      WITH ReturnShptHeader DO
+        FormatAddr(
+          AddrArray,"Pay-to Name","Pay-to Name 2","Pay-to Contact","Pay-to Address","Pay-to Address 2",
+          "Pay-to City","Pay-to Post Code","Pay-to County","Pay-to Country/Region Code");
+    END;
+
+    PROCEDURE PurchShptShipTo@5802(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ReturnShptHeader@1001 : Record 6650);
+    BEGIN
+      WITH ReturnShptHeader DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE AltAddr@34(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR Employee@1001 : Record 5200;VAR AlternativeAddr@1002 : Record 5201);
+    BEGIN
+      WITH AlternativeAddr DO
+        FormatAddr(
+          AddrArray,COPYSTR(Employee.FullName,1,50),'','',Address,
+          "Address 2",City,"Post Code",County,"Country/Region Code");
+    END;
+
+    PROCEDURE Employee@33(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR Employee@1001 : Record 5200);
+    BEGIN
+      WITH Employee DO
+        FormatAddr(
+          AddrArray,COPYSTR(FullName,1,50),'','',Address,"Address 2",
+          City,"Post Code",County,"Country/Region Code");
+    END;
+
+    PROCEDURE EmployeeAltAddr@32(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR Employee@1001 : Record 5200);
+    VAR
+      AlternativeAddr@1002 : Record 5201;
+    BEGIN
+      AlternativeAddr.GET(Employee."No.",Employee."Alt. Address Code");
+      WITH AlternativeAddr DO
+        FormatAddr(
+          AddrArray,COPYSTR(Employee.FullName,1,50),'','',Address,
+          "Address 2",City,"Post Code",County,"Country/Region Code");
+    END;
+
+    PROCEDURE VendBankAcc@37(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR VendBankAcc@1001 : Record 288);
+    BEGIN
+      WITH VendBankAcc DO
+        FormatAddr(
+          AddrArray,Name,"Name 2",Contact,Address,"Address 2",
+          City,"Post Code",County,"Country/Region Code");
+    END;
+
+    PROCEDURE CustBankAcc@38(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR CustBankAcc@1001 : Record 287);
+    BEGIN
+      WITH CustBankAcc DO
+        FormatAddr(
+          AddrArray,Name,"Name 2",Contact,Address,"Address 2",
+          City,"Post Code",County,"Country/Region Code");
+    END;
+
+    PROCEDURE RespCenter@40(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR RespCenter@1001 : Record 5714);
+    BEGIN
+      WITH RespCenter DO
+        FormatAddr(
+          AddrArray,Name,"Name 2",Contact,Address,"Address 2",
+          City,"Post Code",County,"Country/Region Code");
+    END;
+
+    PROCEDURE TransferShptTransferFrom@35(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR TransShptHeader@1001 : Record 5744);
+    BEGIN
+      WITH TransShptHeader DO
+        FormatAddr(
+          AddrArray,"Transfer-from Name","Transfer-from Name 2",'',"Transfer-from Address","Transfer-from Address 2",
+          "Transfer-from City","Transfer-from Post Code","Transfer-from County","Trsf.-from Country/Region Code");
+    END;
+
+    PROCEDURE TransferShptTransferTo@36(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR TransShptHeader@1001 : Record 5744);
+    BEGIN
+      WITH TransShptHeader DO
+        FormatAddr(
+          AddrArray,"Transfer-to Name","Transfer-to Name 2",'',"Transfer-to Address","Transfer-to Address 2",
+          "Transfer-to City","Transfer-to Post Code","Transfer-to County","Trsf.-to Country/Region Code");
+    END;
+
+    PROCEDURE TransferRcptTransferFrom@41(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR TransRcptHeader@1001 : Record 5746);
+    BEGIN
+      WITH TransRcptHeader DO
+        FormatAddr(
+          AddrArray,"Transfer-from Name","Transfer-from Name 2",'',"Transfer-from Address","Transfer-from Address 2",
+          "Transfer-from City","Transfer-from Post Code","Transfer-from County","Trsf.-from Country/Region Code");
+    END;
+
+    PROCEDURE TransferRcptTransferTo@39(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR TransRcptHeader@1001 : Record 5746);
+    BEGIN
+      WITH TransRcptHeader DO
+        FormatAddr(
+          AddrArray,"Transfer-to Name","Transfer-to Name 2",'',"Transfer-to Address","Transfer-to Address 2",
+          "Transfer-to City","Transfer-to Post Code","Transfer-to County","Trsf.-to Country/Region Code");
+    END;
+
+    PROCEDURE TransferHeaderTransferFrom@43(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR TransHeader@1001 : Record 5740);
+    BEGIN
+      WITH TransHeader DO
+        FormatAddr(
+          AddrArray,"Transfer-from Name","Transfer-from Name 2",'',"Transfer-from Address","Transfer-from Address 2",
+          "Transfer-from City","Transfer-from Post Code","Transfer-from County","Trsf.-from Country/Region Code");
+    END;
+
+    PROCEDURE TransferHeaderTransferTo@42(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR TransHeader@1001 : Record 5740);
+    BEGIN
+      WITH TransHeader DO
+        FormatAddr(
+          AddrArray,"Transfer-to Name","Transfer-to Name 2",'',"Transfer-to Address","Transfer-to Address 2",
+          "Transfer-to City","Transfer-to Post Code","Transfer-to County","Trsf.-to Country/Region Code");
+    END;
+
+    PROCEDURE ContactAddr@45(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR Cont@1001 : Record 5050);
+    BEGIN
+      ContactAddrAlt(AddrArray,Cont,Cont.ActiveAltAddress(WORKDATE),WORKDATE)
+    END;
+
+    PROCEDURE ContactAddrAlt@44(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR Cont@1001 : Record 5050;AltAddressCode@1002 : Code[10];ActiveDate@1003 : Date);
+    VAR
+      RMSetup@1004 : Record 5079;
+      ContCompany@1005 : Record 5050;
+      ContAltAddr@1006 : Record 5051;
+      CompanyAltAddressCode@1007 : Code[10];
+      ContIdenticalAddress@1008 : Boolean;
+    BEGIN
+      RMSetup.GET;
+
+      IF (Cont.Type = Cont.Type::Person) AND (Cont."Company No." <> '') THEN BEGIN
+        ContCompany.GET(Cont."Company No.");
+        CompanyAltAddressCode := ContCompany.ActiveAltAddress(ActiveDate);
+        ContIdenticalAddress := Cont.IdenticalAddress(ContCompany);
+      END;
+
+      CASE TRUE OF
+        AltAddressCode <> '':
+          WITH ContAltAddr DO BEGIN
+            GET(Cont."No.",AltAddressCode);
+            FormatAddr(
+              AddrArray,"Company Name","Company Name 2",Cont.Name,Address,"Address 2",
+              City,"Post Code",County,"Country/Region Code");
+          END;
+        (Cont.Type=Cont.Type::Person) AND
+        (Cont."Company No." <> '') AND
+        (CompanyAltAddressCode <> '') AND
+        RMSetup."Inherit Address Details" AND
+        ContIdenticalAddress:
+          WITH ContAltAddr DO BEGIN
+            GET(Cont."Company No.",CompanyAltAddressCode);
+            FormatAddr(
+              AddrArray,"Company Name","Company Name 2",Cont.Name,Address,"Address 2",
+              City,"Post Code",County,"Country/Region Code");
+          END;
+        (Cont.Type=Cont.Type::Person) AND
+        (Cont."Company No." <> ''):
+          WITH Cont DO
+            FormatAddr(
+              AddrArray,ContCompany.Name,ContCompany."Name 2",Name,Address,"Address 2",
+              City,"Post Code",County,"Country/Region Code")
+      ELSE
+        WITH Cont DO
+          FormatAddr(
+            AddrArray,Name,"Name 2",'',Address,"Address 2",
+            City,"Post Code",County,"Country/Region Code")
+      END;
+    END;
+
+    PROCEDURE ServiceOrderSellto@47(VAR AddrArray@1000 : ARRAY [8] OF Text[50];ServHeader@1001 : Record 5900);
+    BEGIN
+      WITH ServHeader DO
+        FormatAddr(
+          AddrArray,Name,"Name 2","Contact Name",Address,"Address 2",
+          City,"Post Code",County,"Country/Region Code");
+    END;
+
+    PROCEDURE ServiceOrderShipto@53(VAR AddrArray@1000 : ARRAY [8] OF Text[50];ServHeader@1001 : Record 5900);
+    BEGIN
+      WITH ServHeader DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE ServContractSellto@50(VAR AddrArray@1000 : ARRAY [8] OF Text[50];ServContract@1001 : Record 5965);
+    BEGIN
+      WITH ServContract DO BEGIN
+        CALCFIELDS(Name,"Name 2",Address,"Address 2","Post Code",City,County,"Country/Region Code");
+        FormatAddr(
+          AddrArray,Name,"Name 2","Contact Name",Address,"Address 2",
+          City,"Post Code",County,"Country/Region Code");
+      END;
+    END;
+
+    PROCEDURE ServContractShipto@52(VAR AddrArray@1000 : ARRAY [8] OF Text[50];ServContract@1001 : Record 5965);
+    BEGIN
+      WITH ServContract DO BEGIN
+        CALCFIELDS(
+          "Ship-to Name","Ship-to Name 2","Ship-to Address","Ship-to Address 2",
+          "Ship-to Post Code","Ship-to City","Ship-to County","Ship-to Country/Region Code");
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Contact Name","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+      END;
+    END;
+
+    PROCEDURE ServiceInvBillTo@49(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ServiceInvHeader@1001 : Record 5992);
+    BEGIN
+      WITH ServiceInvHeader DO
+        FormatAddr(
+          AddrArray,"Bill-to Name","Bill-to Name 2","Bill-to Contact","Bill-to Address","Bill-to Address 2",
+          "Bill-to City", "Bill-to Post Code","Bill-to County","Bill-to Country/Region Code");
+    END;
+
+    PROCEDURE ServiceInvShipTo@51(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ServiceInvHeader@1001 : Record 5992);
+    BEGIN
+      WITH ServiceInvHeader DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE ServiceShptShipTo@54(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ServiceShptHeader@1001 : Record 5990);
+    BEGIN
+      WITH ServiceShptHeader DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE ServiceShptSellTo@56(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ServiceShptHeader@1001 : Record 5990);
+    BEGIN
+      WITH ServiceShptHeader DO
+        FormatAddr(
+          AddrArray,Name,"Name 2","Contact Name",Address,"Address 2",
+          City,"Post Code",County,"Country/Region Code");
+    END;
+
+    PROCEDURE ServiceShptBillTo@55(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ServiceShptHeader@1001 : Record 5990);
+    BEGIN
+      WITH ServiceShptHeader DO
+        FormatAddr(
+          AddrArray,"Bill-to Name","Bill-to Name 2","Bill-to Contact","Bill-to Address","Bill-to Address 2",
+          "Bill-to City","Bill-to Post Code","Bill-to County","Bill-to Country/Region Code");
+    END;
+
+    PROCEDURE ServiceCrMemoBillTo@58(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ServiceCrMemoHeader@1001 : Record 5994);
+    BEGIN
+      WITH ServiceCrMemoHeader DO
+        FormatAddr(
+          AddrArray,"Bill-to Name","Bill-to Name 2","Bill-to Contact","Bill-to Address","Bill-to Address 2",
+          "Bill-to City","Bill-to Post Code","Bill-to County","Bill-to Country/Region Code");
+    END;
+
+    PROCEDURE ServiceCrMemoShipTo@57(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ServiceCrMemoHeader@1001 : Record 5994);
+    BEGIN
+      WITH ServiceCrMemoHeader DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE ServiceHeaderSellTo@61(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ServiceHeader@1001 : Record 5900);
+    BEGIN
+      WITH ServiceHeader DO
+        FormatAddr(
+          AddrArray,Name,"Name 2","Contact No.",Address,"Address 2",
+          City,"Post Code",County,"Country/Region Code");
+    END;
+
+    PROCEDURE ServiceHeaderBillTo@60(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ServiceHeader@1001 : Record 5900);
+    BEGIN
+      WITH ServiceHeader DO
+        FormatAddr(
+          AddrArray,"Bill-to Name","Bill-to Name 2","Bill-to Contact","Bill-to Address","Bill-to Address 2",
+          "Bill-to City","Bill-to Post Code","Bill-to County","Bill-to Country/Region Code");
+    END;
+
+    PROCEDURE ServiceHeaderShipTo@59(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ServiceHeader@1001 : Record 5900);
+    BEGIN
+      WITH ServiceHeader DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE ShipToAddress@1040000(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR ShipToAddress@1001 : Record 222);
+    BEGIN
+      WITH ShipToAddress DO
+        FormatAddr(
+          AddrArray,Name,"Name 2",Address,"Address 2",City,County,Contact,ShipToAddress."Phone No.",
+          ShipToAddress."Telex No.");
+    END;
+
+    PROCEDURE SalesHeaderArchBillTo@46(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR SalesHeaderArch@1001 : Record 5107);
+    BEGIN
+      WITH SalesHeaderArch DO
+        FormatAddr(
+          AddrArray,"Bill-to Name","Bill-to Name 2","Bill-to Contact","Bill-to Address","Bill-to Address 2",
+          "Bill-to City","Bill-to Post Code","Bill-to County","Bill-to Country/Region Code");
+    END;
+
+    PROCEDURE SalesHeaderArchShipTo@48(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR SalesHeaderArch@1001 : Record 5107);
+    BEGIN
+      WITH SalesHeaderArch DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE PurchHeaderBuyFromArch@62(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR PurchHeaderArch@1001 : Record 5109);
+    BEGIN
+      WITH PurchHeaderArch DO
+        FormatAddr(
+          AddrArray,"Buy-from Vendor Name","Buy-from Vendor Name 2","Buy-from Contact","Buy-from Address","Buy-from Address 2",
+          "Buy-from City","Buy-from Post Code","Buy-from County","Buy-from Country/Region Code");
+    END;
+
+    PROCEDURE PurchHeaderPayToArch@64(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR PurchHeaderArch@1001 : Record 5109);
+    BEGIN
+      WITH PurchHeaderArch DO
+        FormatAddr(
+          AddrArray,"Pay-to Name","Pay-to Name 2","Pay-to Contact","Pay-to Address","Pay-to Address 2",
+          "Pay-to City","Pay-to Post Code","Pay-to County","Pay-to Country/Region Code");
+    END;
+
+    PROCEDURE PurchHeaderShipToArch@63(VAR AddrArray@1000 : ARRAY [8] OF Text[50];VAR PurchHeaderArch@1001 : Record 5109);
+    BEGIN
+      WITH PurchHeaderArch DO
+        FormatAddr(
+          AddrArray,"Ship-to Name","Ship-to Name 2","Ship-to Contact","Ship-to Address","Ship-to Address 2",
+          "Ship-to City","Ship-to Post Code","Ship-to County","Ship-to Country/Region Code");
+    END;
+
+    PROCEDURE "*****Creative******"@1040003();
+    BEGIN
+    END;
+
+    PROCEDURE FindAFDAddress@1040001(VAR pName@1040000 : Text[60];VAR pName2@1040001 : Text[60];VAR pAddress@1040002 : Text[60];VAR pAddress2@1040003 : Text[60];VAR pCity@1040004 : Text[30];VAR pCounty@1040005 : Text[30];VAR pPostCode@1040006 : Code[20];VAR pHouseNo@1040007 : Code[10]);
+    VAR
+      TmpAFTAddressBuffer@1040008 : TEMPORARY Record 50000;
+    BEGIN
+      //AK 270608 -
+      IF pPostCode = '' THEN
+        EXIT;
+
+      WITH TmpAFTAddressBuffer DO BEGIN
+        DELETEALL;
+        INIT;
+        "No." := 0;
+        Name := pName;
+        "House No." := pHouseNo;
+        //Address := pAddress;
+        //"Address 2" := pAddress2;
+        "Post Code" := pPostCode;
+        INSERT;
+
+
+        IF FORM.RUNMODAL(FORM::"Address Search Card",TmpAFTAddressBuffer) = ACTION::LookupOK THEN BEGIN
+
+          pName := TmpAFTAddressBuffer.Name;
+          pName2 := TmpAFTAddressBuffer."Name 2";
+          //pHouseNo := TmpAFTAddressBuffer."House No.";
+
+          IF (pHouseNo <> '') AND (TmpAFTAddressBuffer.Address <> '') THEN
+            pAddress := pHouseNo  + ', ' + TmpAFTAddressBuffer.Address
+          ELSE
+            IF (pHouseNo <> '') AND (TmpAFTAddressBuffer.Address = '') THEN
+              pAddress := pHouseNo
+            ELSE
+              IF (pHouseNo = '') AND (TmpAFTAddressBuffer.Address <> '') THEN
+                pAddress := TmpAFTAddressBuffer.Address
+              ELSE
+                pAddress := TmpAFTAddressBuffer.Address;
+
+          pAddress2 := TmpAFTAddressBuffer."Address 2";
+          pCity := TmpAFTAddressBuffer.City;
+          pCounty := TmpAFTAddressBuffer.County;
+          pPostCode := TmpAFTAddressBuffer."Post Code";
+        END;
+      END;
+      //AK 270608 +
+    END;
+
+    PROCEDURE NewCustFindAFDAddress@1040008(VAR pCustName@1040000 : Text[50];VAR pCustName2@1040001 : Text[50];VAR pCustAddress@1040002 : Text[50];VAR pCustAddress2@1040003 : Text[50];VAR pCustcity@1040004 : Text[30];VAR pCustcounty@1040005 : Text[30];VAR pCustPostCode@1040006 : Code[20];VAR pCustHouseNo@1040007 : Code[10]);
+    VAR
+      lCustName@1040008 : Text[50];
+      lCustName2@1040009 : Text[50];
+      Country@1040010 : Code[10];
+    BEGIN
+      //<MQKOS>changed from AFD call to MQ call...
+      //AK 031109 -
+      //FindAFDAddress(lCustName,lCustName2,pCustAddress,pCustAddress2,pCustcity,pCustcounty,pCustPostCode,pCustHouseNo);
+      //AK 031109 -
+      //DOC OP12513 DB 19/02/2018 -
+      //GetAddress(pCustPostCode,pCustHouseNo,'',
+      //            pCustAddress,pCustAddress2,pCustcity,pCustcounty,'UK');
+      Country := 'UK';
+      GetAddress(pCustPostCode,pCustHouseNo,'',
+                  pCustAddress,pCustAddress2,pCustcity,pCustcounty,Country);
+      //DOC OP12513 DB 19/02/2018 +
+      //</MQKOS>
+    END;
+
+    PROCEDURE CustFindAFDAddress@1040002(VAR Cust@1040000 : Record 18);
+    BEGIN
+      //<MQKOS>changed from AFD call to MQ call...
+      //AK 270608 -
+      //FindAFDAddress(Cust.Name,Cust."Name 2",Cust.Address,Cust."Address 2",Cust.City,Cust.County,Cust."Post Code",Cust."House No.");
+      //AK 270608 +
+      GetAddress(Cust."Post Code",Cust."House No.",'',
+                  Cust.Address,Cust."Address 2",Cust.City,Cust.County,Cust."Country/Region Code");
+      //</MQKOS>
+    END;
+
+    PROCEDURE VendFindAFDAddress@1040004(VAR Vendor@1040000 : Record 23);
+    BEGIN
+      //<MQKOS>changed from AFD call to MQ call...
+      //AK 270608 -
+      //FindAFDAddress(Vendor.Name,Vendor."Name 2",Vendor.Address,Vendor."Address 2",Vendor.City,Vendor.County,
+      //  Vendor."Post Code",Vendor."House No.");
+      //AK 270608 +
+      GetAddress(Vendor."Post Code",Vendor."House No.",'',
+                  Vendor.Address,Vendor."Address 2",Vendor.City,Vendor.County,Vendor."Country/Region Code");
+      //</MQKOS>
+    END;
+
+    PROCEDURE ContFindAFDAddress@1040005(VAR Contact@1040000 : Record 5050);
+    BEGIN
+      //<MQKOS>changed from AFD call to MQ call...
+      //AK 270608 -
+      //FindAFDAddress(Contact.Name,Contact."Name 2",Contact.Address,Contact."Address 2",Contact.City,Contact.County,
+      //  Contact."Post Code",Contact."House No.");
+      //AK 270608 +
+      GetAddress(Contact."Post Code",Contact."House No.",'',
+                  Contact.Address,Contact."Address 2",Contact.City,Contact.County,Contact."Country/Region Code");
+      //</MQKOS>
+    END;
+
+    PROCEDURE ShipToAddrFindAFDAddress@1040006(VAR ShiptoAddress@1040000 : Record 222);
+    BEGIN
+      //<MQKOS>changed from AFD call to MQ call...
+      //AK 270608 -
+      //FindAFDAddress(ShiptoAddress.Name,ShiptoAddress."Name 2",ShiptoAddress.Address,ShiptoAddress."Address 2",
+      //  ShiptoAddress.City,ShiptoAddress.County,ShiptoAddress."Post Code",ShiptoAddress."House No.");
+      //AK 270608 +
+      GetAddress(ShiptoAddress."Post Code",ShiptoAddress."House No.",'',
+                  ShiptoAddress.Address,ShiptoAddress."Address 2",ShiptoAddress.City,ShiptoAddress.County,
+                  ShiptoAddress."Country/Region Code");
+      //</MQKOS>
+    END;
+
+    PROCEDURE VendOrderAddrFindAFDAddress@1040007(VAR OrderAddress@1040000 : Record 224);
+    BEGIN
+      //<MQKOS>changed from AFD call to MQ call...
+      //AK 280808 -
+      //FindAFDAddress(OrderAddress.Name,OrderAddress."Name 2",OrderAddress.Address,OrderAddress."Address 2",
+      //  OrderAddress.City,OrderAddress.County,OrderAddress."Post Code",OrderAddress."House No.");
+      //AK 280808 +
+      GetAddress(OrderAddress."Post Code",OrderAddress."House No.",'',
+                  OrderAddress.Address,OrderAddress."Address 2",OrderAddress.City,OrderAddress.County,OrderAddress."Country/Region Code");
+      //</MQKOS>
+    END;
+
+    PROCEDURE "##### MQ ######"@1040009();
+    BEGIN
+    END;
+
+    PROCEDURE GetAddress@1040010(VAR PostCode@1040009 : Code[20];VAR BuildingNumber@1040008 : Code[10];BuildingName@1040007 : Text[50];VAR Address1@1040006 : Text[50];VAR Address2@1040005 : Text[50];VAR City@1040004 : Text[30];VAR County@1040003 : Text[30];VAR CountryCode@1040002 : Code[10]);
+    VAR
+      AddressBarcode@1040000 : Text[30];
+      AddressLookup@1040001 : Record 9022500;
+      PCAPredictMgt@1040010 : Codeunit 50039;
+    BEGIN
+      //AddressBarcode not used as absent from NH tables; needs local VAR as it's passed as VAR...
+      //AddressLookup.GetAddress(PostCode,BuildingNumber,BuildingName,Address1,Address2,City,County,CountryCode,Barcode)
+      //DOC OP12513 DB 19/02/2018 -
+      //AddressLookup.GetAddress(PostCode,BuildingNumber,BuildingName,Address1,Address2,City,County,CountryCode,AddressBarcode)
+      PCAPredictMgt.GetAddress(PostCode,BuildingNumber,BuildingName,Address1,Address2,City,County,CountryCode);
+      //DOC OP12513 DB 19/02/2018 +
+    END;
+
+    BEGIN
+    {
+      AK 260608 - Added code to print on seperate
+      AK 270708 - Added function [FindAFDAddress,CustFindAFDAddress,VendFindAFDAddress,ContFindAFDAddress]
+      AK 031109 - Added function [NewCustFindAFDAddress]
+
+      MQAL1.5     MQ Address Lookup
+      MA 290812 - Added function [FindAddress] to use in place of calls to [FindAFDAddress]
+                  Replaced all calls to FindAFDAddress with call to FindAddress
+      //DOC OP12513 DB 19/02/2018 - Amended GetAddress function to change to PCA Predict.
+                                    Flagged PostCode,BuildingNumber and CountryCode parameter as VAR.
+                                    Changed NewCustFindAFDAddress to allow updating of Country Code.
+    }
+    END.
+  }
+}
+
+OBJECT Codeunit 50039 PCA Predict Management
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19/02/18;
+    Time=14:24:42;
+    Modified=Yes;
+    Version List=OP12513;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      CompanyInformation@1040000 : Record 79;
+      ErrNoAddressesRetrieved@1040002 : TextConst 'ENU=No addresses have been retrieved.\Please check if you need to top-up your PCA account.;ENG=No addresses have been retrieved.\Please check if you need to top-up your PCA account.';
+      ErrNotAllowedToUsePCA@1040003 : TextConst 'ENU=You are not allowed to search for postcodes.;ENG=You are not allowed to search for postcodes.';
+      ErrWebServiceFailed@1040004 : TextConst 'ENU=PostcodeAnywhere Web service call failed;ENG=PostcodeAnywhere Web service call failed';
+      ErrUserNotExist@1040005 : TextConst 'ENU=The user %1 doesn''t exist on User Setup.;ENG=The user %1 doesn''t exist on User Setup.';
+      ErrMissingCountrySetup@1040001 : TextConst 'ENU="""Include PCA Results"" must be selected for at least one country.";ENG="""Include PCA Results"" must be selected for at least one country."';
+
+    PROCEDURE GetAddress@1000000001(VAR PostCode@1000000000 : Code[20];VAR BuildingNumber@1040002 : Code[10];VAR BuildingName@1040001 : Text[50];VAR Address@1000000001 : Text[50];VAR "Address 2"@1000000002 : Text[50];VAR City@1000000004 : Text[30];VAR County@1040003 : Text[30];VAR Country@1000000005 : Code[10]);
+    VAR
+      XMLDoc@1000000007 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{88D96A05-F192-11D4-A65F-0040963251E5}:'Microsoft XML, v6.0'.DOMDocument60";
+      XMLDocNodeList@1000000008 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNodeList2@1000000009 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNodeList3@1000000020 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNode@1000000010 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      XMLDocNode2@1000000011 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      XMLDocNode3@1000000021 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      AttributeList@1000000012 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF83-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNamedNodeMap";
+      Attribute@1000000013 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      TempCust@1000000014 : TEMPORARY Record 18;
+      URLString@1000000015 : Text[1024];
+      i@1000000016 : Integer;
+      j@1000000017 : Integer;
+      RecCounter@1000000018 : Integer;
+      Container@1000000019 : Text[30];
+      CountriesString@1040000 : Text[250];
+    BEGIN
+      IF NOT GUIALLOWED THEN
+        EXIT;
+
+      CheckUser;
+
+      IF NOT CompanyInformation.GET THEN
+        CompanyInformation.INIT;
+
+      URLString := 'http://services.postcodeanywhere.co.uk/Capture/Interactive/Find/v1.00/dataset.ws?';
+      URLString += '&Key=' + EncodeUri(CompanyInformation."PCA Predict Key");
+      URLString += '&Text=' + EncodeUri(BuildingNumber+' '+PostCode);
+      URLString += '&Countries=' + EncodeUri(BuildCountriesString); //PCA uses GB not UK. If client use UK this code must be change
+      URLString += '&Language=' + EncodeUri('en');
+
+      IF NOT WSCall_Rest(URLString,XMLDoc) THEN
+        ERROR(ErrWebServiceFailed);
+      XMLDocNodeList := XMLDoc.getElementsByTagName('NewDataSet');
+      XMLDocNode := XMLDocNodeList.item(0);
+      XMLDocNodeList2 := XMLDocNode.childNodes;
+      XMLDocNode2 := XMLDocNodeList2.item(0);
+      XMLDocNodeList3 := XMLDocNode2.childNodes;
+      FOR i :=0 TO XMLDocNodeList3.length-1 DO BEGIN
+        XMLDocNode3 := XMLDocNodeList3.item(i);
+        IF XMLDocNode3.nodeName = 'Id' THEN
+          Container := XMLDocNode3.text;
+        IF (XMLDocNode3.nodeName = 'Type') AND (XMLDocNode3.text<>'Address') THEN
+          URLString += '&Container=' + EncodeUri(Container);
+      END;
+
+      CLEAR(XMLDoc);
+      CLEAR(XMLDocNodeList);
+      CLEAR(XMLDocNodeList2);
+      CLEAR(XMLDocNodeList3);
+      CLEAR(XMLDocNode);
+      CLEAR(XMLDocNode2);
+      CLEAR(XMLDocNode2);
+      CLEAR(AttributeList);
+      CLEAR(Attribute);
+
+      IF NOT WSCall_Rest(URLString,XMLDoc) THEN
+        ERROR(ErrWebServiceFailed);
+
+      XMLDocNodeList := XMLDoc.getElementsByTagName('NewDataSet');
+      XMLDocNode := XMLDocNodeList.item(0);
+      XMLDocNodeList2 := XMLDocNode.childNodes;
+
+      RecCounter :=1;
+      FOR i:=0 TO XMLDocNodeList2.length-1 DO BEGIN
+        XMLDocNode2 := XMLDocNodeList2.item(i);
+        XMLDocNodeList3 := XMLDocNode2.childNodes;
+        FOR j:=0 TO XMLDocNodeList3.length-1 DO BEGIN
+          XMLDocNode3 := XMLDocNodeList3.item(j);
+          TempCust."No." := FORMAT(RecCounter);
+          RecCounter +=1;
+          CASE XMLDocNode3.nodeName OF
+            'Id': TempCust."Search Name" := COPYSTR(XMLDocNode3.text,1,30);
+            'Text': TempCust.Address := COPYSTR(XMLDocNode3.text,1,50);
+            'Description': TempCust.Name := COPYSTR(XMLDocNode2.text,1,50);
+          END;
+        END;
+        TempCust.INSERT;
+      END;
+
+      IF NOT TempCust.FINDFIRST THEN  //not use ISEMPTY to set the cursor on the first entry
+        ERROR(ErrNoAddressesRetrieved);
+
+      IF FORM.RUNMODAL(FORM::"Post Code Validation" ,TempCust)=ACTION::LookupOK THEN
+        GetAddressDetails(TempCust."Search Name",PostCode,BuildingNumber,
+                           BuildingName,Address,"Address 2",City,County,Country);
+    END;
+
+    LOCAL PROCEDURE GetAddressDetails@1000000003(ID@1000000000 : Text[30];VAR PostCode@1000000001 : Code[10];VAR BuildingNumber@1040003 : Code[10];VAR BuildingName@1040004 : Text[50];VAR Address@1000000002 : Text[50];VAR "Address 2"@1000000003 : Text[50];VAR City@1000000005 : Text[30];VAR County@1040005 : Text[30];VAR Country@1000000006 : Code[10]);
+    VAR
+      XMLDoc@1000000007 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{88D96A05-F192-11D4-A65F-0040963251E5}:'Microsoft XML, v6.0'.DOMDocument60";
+      XMLDocNodeList@1000000018 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNodeList2@1000000017 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNodeList3@1000000012 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNode@1000000016 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      XMLDocNode2@1000000015 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      XMLDocNode3@1000000013 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      URLString@1000000011 : Text[1024];
+      i@1000000010 : Integer;
+      j@1000000009 : Integer;
+      RecCounter@1000000008 : Integer;
+      Lang@1040001 : Code[10];
+      Line@1040000 : ARRAY [5] OF Text[50];
+    BEGIN
+      URLString := 'http://services.postcodeanywhere.co.uk/Capture/Interactive/Retrieve/v1.00/dataset.ws?';
+      URLString += '&Key=' + EncodeUri(CompanyInformation."PCA Predict Key");
+      URLString += '&Id=' + EncodeUri(ID);
+
+      IF NOT WSCall_Rest(URLString,XMLDoc) THEN
+        ERROR(ErrWebServiceFailed);
+      XMLDocNodeList := XMLDoc.getElementsByTagName('NewDataSet');
+      XMLDocNode := XMLDocNodeList.item(0);
+      XMLDocNodeList2 := XMLDocNode.childNodes;
+      FOR i:=0 TO XMLDocNodeList2.length-1 DO BEGIN
+        XMLDocNode2 := XMLDocNodeList2.item(i);
+        IF XMLDocNode2.nodeName = 'Data' THEN BEGIN
+          XMLDocNodeList3 := XMLDocNode2.childNodes;
+          IF Lang<>'ENG'THEN BEGIN
+            FOR j:=0 TO XMLDocNodeList3.length-1 DO BEGIN
+              XMLDocNode3 := XMLDocNodeList3.item(j);
+              CASE XMLDocNode3.nodeName OF
+                'PostalCode': PostCode := COPYSTR(XMLDocNode3.text,1,20);
+                'Line1': Line[1] := COPYSTR(XMLDocNode3.text,1,50);
+                'Line2': Line[2] := COPYSTR(XMLDocNode3.text,1,50);
+                'Line3': Line[3] := COPYSTR(XMLDocNode3.text,1,50);
+                'Line4': Line[4] := COPYSTR(XMLDocNode3.text,1,50);
+                'Line5': Line[5] := COPYSTR(XMLDocNode3.text,1,50);
+                'City': City := COPYSTR(XMLDocNode3.text,1,30);
+                'Province': County := COPYSTR(XMLDocNode3.text,1,30);
+                'CountryIso2': Country := XMLDocNode3.text;
+                'Language': Lang := XMLDocNode3.text;
+                'BuildingNumber': BuildingNumber := COPYSTR(XMLDocNode3.text,1,50);
+                'BuildingName': BuildingNumber := COPYSTR(XMLDocNode3.text,1,50);
+              END;
+            END;
+            UpdateCustAddress(Line,Address,"Address 2");
+          END;
+        END;
+      END;
+    END;
+
+    LOCAL PROCEDURE EncodeUri@1000000000(Uri@1000000000 : Text[80]) EncodedUri : Text[250];
+    VAR
+      HexDigits@1000000002 : Text[30];
+      i@1000000003 : Integer;
+      b@1000000004 : Integer;
+    BEGIN
+      HexDigits := '0123456789ABCDEF';
+      EncodedUri := '';
+      FOR i:=1 TO STRLEN(Uri) DO
+      BEGIN
+        b := Uri[i];
+        EncodedUri := EncodedUri + '%  ';
+        EncodedUri[STRLEN(EncodedUri)-1] := HexDigits[(b DIV 16)+1];
+        EncodedUri[STRLEN(EncodedUri)] := HexDigits[(b MOD 16)+1];
+      END;
+      EXIT(EncodedUri);
+    END;
+
+    LOCAL PROCEDURE WSCall_Rest@1000000002(URL@1000000000 : Text[1024];VAR XMLDoc@1000000001 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{88D96A05-F192-11D4-A65F-0040963251E5}:'Microsoft XML, v6.0'.DOMDocument60") : Boolean;
+    VAR
+      XMLRequest@1000000002 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{88D96A0A-F192-11D4-A65F-0040963251E5}:'Microsoft XML, v6.0'.XMLHTTP60";
+    BEGIN
+      CREATE(XMLRequest);
+      CREATE(XMLDoc);
+      XMLRequest.open('GET',URL,FALSE);
+      XMLRequest.setRequestHeader('Content-type', 'text/xml; charset=utf-8');
+      XMLRequest.send();
+
+      IF XMLRequest.status=200 THEN
+      BEGIN
+        XMLDoc := XMLRequest.responseXML;
+        EXIT(TRUE);
+      END ELSE BEGIN
+        EXIT(FALSE);
+      END;
+    END;
+
+    LOCAL PROCEDURE UpdateCustAddress@1040007(VAR Line@1000000004 : ARRAY [5] OF Text[50];VAR Address@1000000006 : Text[50];VAR "Address 2"@1000000005 : Text[50]);
+    VAR
+      i@1000000000 : Integer;
+      Address1Full@1000000001 : Boolean;
+      Address2Full@1000000002 : Boolean;
+    BEGIN
+      Address :='';
+      "Address 2":='';
+
+      FOR i:=1 TO 5 DO BEGIN
+        IF Line[i]<>'' THEN BEGIN
+          IF (STRLEN(Address)+STRLEN(Line[i])<=48) THEN BEGIN
+            IF Address <> '' THEN
+              Address := Address + ', ';
+            Address := Address + Line[i];
+          END ELSE
+            Address1Full :=TRUE;
+
+          IF Address1Full AND (STRLEN("Address 2")+STRLEN(Line[i])<=48) THEN BEGIN
+            IF "Address 2" <> '' THEN
+              "Address 2" := ', ';
+            "Address 2" := "Address 2" + Line[i];
+          END ELSE
+              IF Address1Full THEN
+                EXIT;
+        END;
+      END;
+    END;
+
+    LOCAL PROCEDURE CheckUser@1040013();
+    VAR
+      UserSetup@1040000 : Record 91;
+    BEGIN
+      IF UserSetup.GET(USERID) THEN BEGIN
+        IF NOT UserSetup."Allow PCA" THEN
+          ERROR(ErrNotAllowedToUsePCA);
+      END ELSE
+        ERROR(ErrUserNotExist,USERID);
+    END;
+
+    LOCAL PROCEDURE BuildCountriesString@1040008() CountriesString : Text[250];
+    VAR
+      Countries@1040000 : Record 9;
+    BEGIN
+      Countries.SETRANGE("Include PCA Results",TRUE);
+      IF Countries.FINDSET(FALSE,FALSE) THEN BEGIN
+        REPEAT
+          IF CountriesString = '' THEN
+            CountriesString := Countries.Code
+          ELSE
+            CountriesString += ','+ Countries.Code;
+        UNTIL Countries.NEXT=0;
+      END ELSE
+        ERROR(ErrMissingCountrySetup);
+
+      EXIT(CountriesString);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
