@@ -2,8 +2,8 @@ OBJECT Codeunit 50010 My Functions
 {
   OBJECT-PROPERTIES
   {
-    Date=12/02/18;
-    Time=17:45:30;
+    Date=26/02/18;
+    Time=12:20:17;
     Modified=Yes;
     Version List=;
   }
@@ -148,6 +148,55 @@ OBJECT Codeunit 50010 My Functions
         IF FORMAT(Values.GetValue(i)) = StringToFind THEN
           EXIT(i+1);
       END;
+    END;
+
+    [TryFunction]
+    PROCEDURE CheckValidEmailAddress@1000000000(EmailAddress@1000 : Text);
+    VAR
+      i@1001 : Integer;
+      NoOfAtSigns@1002 : Integer;
+      RegEx@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex";
+      RegExOptions@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions";
+      Pattern@1000000002 : Text[80];
+    BEGIN
+      EmailAddress := DELCHR(EmailAddress,'<>');
+
+      Pattern := '^[A-Z0-9._%+-]+@(?:[A-Z0-9-]+\.)+[A-Z]{2,4}$';
+
+      RegExOptions := 0;
+      RegExOptions := RegExOptions.Parse(RegExOptions.GetType(),'IgnoreCase');
+
+      IF NOT RegEx.IsMatch(EmailAddress, Pattern, RegExOptions) THEN
+        ERROR('%1 is invalid.',EmailAddress);
+    END;
+
+    [TryFunction]
+    PROCEDURE TryConstructAndSendEmail@50003(EmailsString@50000 : Text;TextEmailSubject@50001 : Text;TextEmailBody@50002 : Text;ServerTempFilePath@50003 : Text);
+    VAR
+      SMTPMail@1000 : Codeunit 400;
+      CompanyInformation@1001 : Record 79;
+    BEGIN
+      CompanyInformation.GET;
+      SMTPMail.CreateMessage(CompanyInformation.Name, CompanyInformation."E-Mail", EmailsString,
+          STRSUBSTNO(TextEmailSubject, FORMAT(WORKDATE, 0, '<Day,2><Month,2><Year4>')), TextEmailBody, TRUE);
+      SMTPMail.AddAttachment(ServerTempFilePath, STRSUBSTNO(TextEmailSubject, FORMAT(WORKDATE, 0, '<Day,2><Month,2><Year4>')) + '.pdf');
+      SMTPMail.TrySend();
+    END;
+
+    [TryFunction]
+    PROCEDURE SplitAndCheckValidEmailAddress@50004(pEmails@1000000000 : Text);
+    VAR
+      Emails@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+      EmailArray@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      Separator@1000000003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+      i@1000000004 : Integer;
+    BEGIN
+      Emails := pEmails;
+      Separator := ';';
+      EmailArray := Emails.Split(Separator.ToCharArray());
+
+      FOR i := 0 TO EmailArray.Length-1 DO
+        CheckValidEmailAddress(EmailArray.GetValue(i));
     END;
 
     BEGIN
