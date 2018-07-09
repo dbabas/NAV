@@ -1,0 +1,74 @@
+OBJECT Codeunit 50010 Test Functions
+{
+  OBJECT-PROPERTIES
+  {
+    Date=30/06/18;
+    Time=19:53:08;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Customer@1000000000 : Record 18;
+
+    [Test]
+    [HandlerFunctions(MessageHandler,ConfirmHandler)]
+    PROCEDURE CreateCustomer@1000000001();
+    BEGIN
+      Customer.INIT;
+      Customer.VALIDATE(Name, 'Test customer');
+      Customer.INSERT;
+      MESSAGE('Customer created');
+
+      IF CONFIRM('Are you happy?') THEN BEGIN
+        Customer."Name 2" := '1';
+        Customer.MODIFY;
+      END;
+      IF CONFIRM('Are you sure?') THEN BEGIN
+        Customer."Name 2" := '2';
+        Customer.MODIFY;
+      END;
+    END;
+
+    [MessageHandler]
+    PROCEDURE MessageHandler@1000000003(Msg@1000000000 : Text);
+    BEGIN
+    END;
+
+    [ConfirmHandler]
+    PROCEDURE ConfirmHandler@1000000007(Question@1000000000 : Text;VAR Reply@1000000001 : Boolean);
+    BEGIN
+      CASE Question OF
+        'Are you happy?' : Reply := FALSE;
+        'Are you sure?' : Reply := TRUE;
+      END;
+    END;
+
+    BEGIN
+    {
+      Build 10.0.14540
+
+      https://www.youtube.com/watch?v=NCnXbncCT0M
+
+      See articles from Luc van Vugt here: https://goo.gl/wYeXk1
+
+      -Define a codeunit as a Test by setting the property Subtype to "Test"
+      -It will run the OnRun trigger and any Test function.
+      -For each Test function you can define MessageHandler, ConfirmHandler etc. separated by a comma.
+      -The signature of MessageHandler, ConfirmHandler etc. is not populated automaticaly. Must be added manually.
+      -For each Test function you can define the commit behaviour with TransactionModel property (AutoCommit, AutoRollBack, None).
+      -Use default TestRunner codeunit 130400 to run all test codeunits. This will rollback all changes to the database even if committed. Set the
+       property TestIsolation to "Codeunit" to rollback after the completion of each test codeunit.
+    }
+    END.
+  }
+}
+
