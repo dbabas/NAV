@@ -1,0 +1,95 @@
+OBJECT Codeunit 50012 EmailPostedInvoices
+{
+  OBJECT-PROPERTIES
+  {
+    Date=03/05/19;
+    Time=08:16:49;
+    Modified=Yes;
+    Version List=OP14340,OP14343;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+            
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      SalesInvoiceHeader@100000001 : Record 112;
+      SMTPMail@100000003 : Codeunit 400;
+      CompanyInformation@100000000 : Record 79;
+      Customer@100000002 : Record 18;
+      SubjectTxt@100000005 : Text;
+      BodyTxt@100000006 : Text;
+      SalesInvoiceTxt@100000007 : TextConst 'ENU=Invoice';
+      EmailTxt@100000008 : TextConst 'ENU=Please find attahced your Invoice, no. %1;ENG=Please find attahced your Invoice, no. %1';
+      Filename@100000009 : Text;
+      ServerAttachmentFilePath@100000010 : Text[250];
+      SalesReceivablesSetup@100000011 : Record 311;
+      ReportSelections@100000012 : Record 77;
+      ReportID@100000013 : Integer;
+      FileManagement@100000015 : Codeunit 419;
+      FailureSubjectTxt@100000017 : TextConst 'ENU=Failed to send invoice %1.;ENG=Failed to send invoice %1';
+      FailureBodyTxt@100000018 : Text;
+      PurchInvoiceTxt@100000020 : TextConst 'ENU=Purchase Invoice;ENG=Purchase Invoice';
+
+    PROCEDURE SendPurchaseInvoice@100000000(PurchInvHeader@100000000 : Record 122);
+    VAR
+      Vendor@100000001 : Record 23;
+    BEGIN
+      //DOC OP14343 DB 12/04/2019 -
+      IF NOT CompanyInformation.GET THEN
+        CompanyInformation.INIT;
+      WITH PurchInvHeader DO BEGIN
+        //RESET;
+        CLEAR(SMTPMail);
+        SubjectTxt := '';
+        BodyTxt := '';
+        IF Vendor.GET("Pay-to Vendor No.") AND (Vendor."E-Mail"<>'') THEN BEGIN
+          SubjectTxt := CompanyInformation.Name + ' ' + PurchInvoiceTxt;
+          BodyTxt := STRSUBSTNO(EmailTxt,"No.");
+          SMTPMail.CreateMessage(CompanyInformation.Name,
+                                  CompanyInformation."Accounts Email",
+                                  {Vendor."E-Mail", }'dimitrios.bampas@thenavpeople.co.uk',
+                                  SubjectTxt,
+                                  BodyTxt,
+                                  FALSE);
+
+          //Get ReportID
+          ReportSelections.SETRANGE(Usage,ReportSelections.Usage::"P.Invoice");
+          IF ReportSelections.FINDFIRST THEN BEGIN
+            ReportID := ReportSelections."Report ID";
+            //Create attachment
+            ServerAttachmentFilePath := COPYSTR(FileManagement.ServerTempFileName('pdf'),1,250);
+            IF REPORT.SAVEASPDF(ReportID,ServerAttachmentFilePath,PurchInvHeader) THEN BEGIN
+              SMTPMail.AddAttachment(ServerAttachmentFilePath, "No."+'.pdf');
+              IF NOT SMTPMail.TrySend THEN BEGIN
+                CLEAR(SMTPMail);
+                SubjectTxt := STRSUBSTNO(FailureSubjectTxt,"No.");
+                BodyTxt := GETLASTERRORTEXT;
+                SMTPMail.CreateMessage(CompanyInformation.Name,
+                                      CompanyInformation."Accounts Email",
+                                      {CompanyInformation."Accounts Email", }'dimitrios.bampas@thenavpeople.co.uk',
+                                      SubjectTxt,
+                                      BodyTxt,
+                                      FALSE);
+                SMTPMail.TrySend;
+              END;
+            END;
+          END;
+        END;
+      END;
+      //DOC OP14343 DB 12/04/2019 +
+    END;
+
+    BEGIN
+    {
+      //DOC OP14340 DB 03/04/2019 - Created. Code is designed to work in Job Queues
+      //DOC OP14343 DB 12/04/2019 - Added function to send Purchase Invoice
+    }
+    END.
+  }
+}
+
