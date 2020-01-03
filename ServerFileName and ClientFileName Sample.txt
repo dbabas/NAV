@@ -1,0 +1,14 @@
+
+  ServerFileName := FileManagement.ServerTempFileName('txt');
+  ClientFileName := FileManagement.SaveFileDialog('Error Log File',ClientFileName,FileManagement.GetToFilterText('','.txt'));
+  IF FileManagement.ClientFileExists(ClientFileName) THEN
+    FileManagement.DeleteClientFile(ClientFileName);
+  ErrorFile.TEXTMODE(TRUE);
+  ErrorFile.WRITEMODE(TRUE);
+  ErrorFile.CREATE(ServerFileName);
+  REPEAT
+    ErrorFile.WRITE(TempErrorLog."Order No." + '  ' + TempErrorLog."Error Text");
+  UNTIL TempErrorLog.NEXT = 0;
+  ErrorFile.CLOSE;
+  FileManagement.DownloadToFile(ServerFileName,ClientFileName); //DOC OP16362 DB 29/10/19 -+
+  TempErrorLog.DELETEALL;
