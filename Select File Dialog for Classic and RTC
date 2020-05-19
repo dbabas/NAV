@@ -1,0 +1,44 @@
+OBJECT Codeunit 50000 Sekect File Classic & RTC
+{
+  OBJECT-PROPERTIES
+  {
+    Date=05/19/20;
+    Time=11:21:06 PM;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+            Filename := SelectFileDialog;
+            MESSAGE(Filename);
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Filename@1000000000 : Text[250];
+
+    PROCEDURE SelectFileDialog@1000000000() Filename : Text[250];
+    VAR
+      DialogMgt@1000000001 : Codeunit 412;
+      TempFile@1000000000 : File;
+    BEGIN
+      IF ISSERVICETIER THEN BEGIN
+        TempFile.CREATETEMPFILE;
+        Filename := TempFile.NAME + '.xlsx';
+        TempFile.CLOSE;
+        IF UPLOAD('Select File', '','Excel file(*.xlsx)|*.xlsx','',Filename) THEN;
+      END ELSE
+        Filename := DialogMgt.OpenFile('Select File','',2,'',0);
+    END;
+
+    BEGIN
+    {
+      //Version 2009 R2
+    }
+    END.
+  }
+}
+
