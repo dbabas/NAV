@@ -1,0 +1,53 @@
+OBJECT Codeunit 50000 Blob Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=05/22/20;
+    Time=[ 7:46:38 AM];
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+            ServerFileName := FileManagement.ServerTempFileName('pdf');
+            CoA.SAVEASPDF(ServerFileName);
+            PDFFile.OPEN(ServerFileName);
+            PDFFile.CREATEINSTREAM(InStr);
+            TempBlob.Blob.CREATEOUTSTREAM(OutStr);
+            COPYSTREAM(OutStr,InStr);
+            TempBlob.INSERT;
+            PDFFile.CLOSE;
+
+             ServerFileName2 := FileManagement.ServerTempFileName('pdf');
+             CLEAR(InStr);
+             CLEAR(OutStr);
+             TempBlob.Blob.CREATEINSTREAM(InStr);
+             PDFFile.CREATE(ServerFileName2);
+             PDFFile.CREATEOUTSTREAM(OutStr);
+             COPYSTREAM(OutStr,InStr);
+             PDFFile.CLOSE;
+             FileManagement.DownloadToFile(ServerFileName2,'C:\Temp\Test.pdf');
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      FileManagement@100000000 : Codeunit 419;
+      ServerFileName@100000001 : Text;
+      CoA@100000002 : Report 1;
+      TempBlob@100000003 : TEMPORARY Record 99008535;
+      PDFFile@100000004 : File;
+      InStr@100000005 : InStream;
+      OutStr@100000006 : OutStream;
+      ServerFileName2@100000007 : Text;
+
+    BEGIN
+    {
+      //Run a report, save it temporarily in TempBlob and then save it on the local disk.
+    }
+    END.
+  }
+}
+
