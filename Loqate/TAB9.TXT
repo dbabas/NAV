@@ -1,0 +1,71 @@
+OBJECT Table 9 Country/Region
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22/11/18;
+    Time=13:08:10;
+    Modified=Yes;
+    Version List=NAVW17.00,SDL1.000,OP14491;
+  }
+  PROPERTIES
+  {
+    OnDelete=VAR
+               VATRegNoFormat@1000 : Record 381;
+             BEGIN
+               VATRegNoFormat.SETFILTER("Country/Region Code",Code);
+               VATRegNoFormat.DELETEALL;
+             END;
+
+    CaptionML=[ENU=Country/Region;
+               ENG=Country/Region];
+    LookupPageID=Page10;
+  }
+  FIELDS
+  {
+    { 1   ;   ;Code                ;Code10        ;CaptionML=[ENU=Code;
+                                                              ENG=Code];
+                                                   NotBlank=Yes }
+    { 2   ;   ;Name                ;Text50        ;CaptionML=[ENU=Name;
+                                                              ENG=Name] }
+    { 6   ;   ;EU Country/Region Code;Code10      ;CaptionML=[ENU=EU Country/Region Code;
+                                                              ENG=EU Country/Region Code] }
+    { 7   ;   ;Intrastat Code      ;Code10        ;CaptionML=[ENU=Intrastat Code;
+                                                              ENG=Intrastat Code] }
+    { 8   ;   ;Address Format      ;Option        ;InitValue=City+Post Code;
+                                                   CaptionML=[ENU=Address Format;
+                                                              ENG=Address Format];
+                                                   OptionCaptionML=[ENU=Post Code+City,City+Post Code,City+County+Post Code,Blank Line+Post Code+City;
+                                                                    ENG=Post Code+City,City+Post Code,City+County+Post Code,Blank Line+Post Code+City];
+                                                   OptionString=Post Code+City,City+Post Code,City+County+Post Code,Blank Line+Post Code+City }
+    { 9   ;   ;Contact Address Format;Option      ;InitValue=After Company Name;
+                                                   CaptionML=[ENU=Contact Address Format;
+                                                              ENG=Contact Address Format];
+                                                   OptionCaptionML=[ENU=First,After Company Name,Last;
+                                                                    ENG=First,After Company Name,Last];
+                                                   OptionString=First,After Company Name,Last }
+    { 50000;  ;Loqate Country      ;Boolean       ;CaptionML=[ENU=Loqate Country;
+                                                              ENG=Loqate Country];
+                                                   Description=OP14491 }
+    { 60700;  ;Territory Code      ;Code10        ;TableRelation=Territory }
+  }
+  KEYS
+  {
+    {    ;Code                                    ;Clustered=Yes }
+    {    ;EU Country/Region Code                   }
+    {    ;Intrastat Code                           }
+    {    ;Name                                     }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    {
+      //DOC OP14491 DB 22/11/2018 - Added "Loqate Country" field
+    }
+    END.
+  }
+}
+

@@ -1,0 +1,47 @@
+OBJECT Codeunit 50008 XMLHttp Send
+{
+  OBJECT-PROPERTIES
+  {
+    Date=12/12/14;
+    Time=00:00:00;
+    Modified=Yes;
+    Version List=OP10248;
+  }
+  PROPERTIES
+  {
+    OnRun=VAR
+            TxtXmlDocNotSet@1000000000 : TextConst 'ENU=XMLHTTP and XMLDoc have not been set;ENG=XMLHTTP and XMLDoc have not been set';
+          BEGIN
+            IF NOT IsSet THEN ERROR(TxtXmlDocNotSet);
+            xmlhttp.send(xmldoc.xml);
+            IsSet := FALSE;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      xmldoc@1000000003 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.DOMDocument";
+      xmlhttp@1000000001 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.XMLHTTPRequest";
+      IsSet@1000000000 : Boolean;
+
+    PROCEDURE Set@1000000003(VAR xmlHTTP_In@1000000000 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.XMLHTTPRequest";VAR xmlDoc_In@1000000002 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.DOMDocument");
+    BEGIN
+      xmlhttp := xmlHTTP_In;
+      xmldoc := xmlDoc_In;
+      IsSet := TRUE;
+    END;
+
+    PROCEDURE Get@1000000001(VAR xmlHTTP_Out@1000000000 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.XMLHTTPRequest");
+    BEGIN
+      xmlHTTP_Out := xmlhttp;
+    END;
+
+    BEGIN
+    {
+      //DOC NA2015.1 PC 01/03/2010 - Created
+    }
+    END.
+  }
+}
+

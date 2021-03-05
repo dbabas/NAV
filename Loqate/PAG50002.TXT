@@ -1,0 +1,52 @@
+OBJECT Page 50002 Loqate Address Response
+{
+  OBJECT-PROPERTIES
+  {
+    Date=23/11/18;
+    Time=16:21:32;
+    Modified=Yes;
+    Version List=OP14491;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table50002;
+    SourceTableView=SORTING(Sort No.)
+                    ORDER(Ascending);
+    PageType=List;
+  }
+  CONTROLS
+  {
+    { 1000000000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1000000001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1000000002;2;Field  ;
+                SourceExpr=Id;
+                Visible=FALSE }
+
+    { 1000000003;2;Field  ;
+                SourceExpr=Type }
+
+    { 1000000004;2;Field  ;
+                SourceExpr=Text }
+
+    { 1000000005;2;Field  ;
+                SourceExpr=Highlight;
+                Importance=Standard;
+                Visible=FALSE }
+
+    { 1000000006;2;Field  ;
+                SourceExpr=Description }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

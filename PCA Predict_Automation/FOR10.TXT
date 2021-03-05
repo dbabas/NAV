@@ -1,0 +1,174 @@
+OBJECT Form 10 Countries/Regions
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19/02/18;
+    Time=13:03:01;
+    Modified=Yes;
+    Version List=NAVW15.00,MQ2.65,OP12513;
+  }
+  PROPERTIES
+  {
+    Width=13200;
+    Height=9570;
+    CaptionML=[ENU=Countries/Regions;
+               ENG=Countries/Regions];
+    TableBoxID=1;
+    SourceTable=Table9;
+    SourceTableView=SORTING(Name);
+    OnOpenForm=BEGIN
+                 CurrForm.EDITABLE(FALSE);
+               END;
+
+  }
+  CONTROLS
+  {
+    { 1   ;TableBox     ;220  ;220  ;12760;8580 ;HorzGlue=Both;
+                                                 VertGlue=Both;
+                                                 HeadingHeight=1210 }
+    { 2   ;TextBox      ;0    ;0    ;1650 ;0    ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr=Code }
+    { 3   ;Label        ;0    ;0    ;0    ;0    ;ParentControl=2;
+                                                 InColumnHeading=Yes }
+    { 4   ;TextBox      ;0    ;0    ;4400 ;0    ;HorzGlue=Both;
+                                                 ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr=Name }
+    { 5   ;Label        ;0    ;0    ;0    ;0    ;ParentControl=4;
+                                                 InColumnHeading=Yes }
+    { 1040011;TextBox   ;9313 ;5720 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="B2C Customer Template" }
+    { 1040012;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040011;
+                                                 InColumnHeading=Yes }
+    { 1040009;CheckBox  ;7329 ;2090 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Use Online" }
+    { 1040010;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040009;
+                                                 InColumnHeading=Yes }
+    { 1040002;TextBox   ;5980 ;4400 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Dimension Value Code" }
+    { 1040003;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040002;
+                                                 InColumnHeading=Yes }
+    { 1040004;TextBox   ;8024 ;2530 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Customer Template TRADE" }
+    { 1040005;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040004;
+                                                 InColumnHeading=Yes }
+    { 6   ;TextBox      ;0    ;0    ;2750 ;0    ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Address Format" }
+    { 7   ;Label        ;0    ;0    ;0    ;0    ;ParentControl=6;
+                                                 InColumnHeading=Yes }
+    { 15  ;TextBox      ;7541 ;440  ;2750 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Contact Address Format" }
+    { 16  ;Label        ;0    ;0    ;0    ;0    ;ParentControl=15;
+                                                 InColumnHeading=Yes }
+    { 11  ;TextBox      ;8599 ;770  ;1650 ;440  ;Visible=No;
+                                                 ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="EU Country/Region Code" }
+    { 12  ;Label        ;0    ;0    ;0    ;0    ;ParentControl=11;
+                                                 InColumnHeading=Yes }
+    { 13  ;TextBox      ;11139;660  ;1650 ;440  ;Visible=No;
+                                                 ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Intrastat Code" }
+    { 14  ;Label        ;0    ;0    ;0    ;0    ;ParentControl=13;
+                                                 InColumnHeading=Yes }
+    { 1040000;TextBox   ;19897;4620 ;4400 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Mandatory B2C Address Fields" }
+    { 1040001;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040000;
+                                                 InColumnHeading=Yes }
+    { 1040013;TextBox   ;24297;4620 ;4400 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Mandatory B2B Address Fields" }
+    { 1040014;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040013;
+                                                 InColumnHeading=Yes }
+    { 1040015;TextBox   ;28697;4620 ;4400 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Address Fields to Load Online" }
+    { 1040016;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040015;
+                                                 InColumnHeading=Yes }
+    { 1040017;CheckBox  ;34899;770  ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Include PCA Results" }
+    { 1040018;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040017;
+                                                 InColumnHeading=Yes }
+    { 8   ;CommandButton;3520 ;8910 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Default=Yes;
+                                                 PushAction=LookupOK;
+                                                 InvalidActionAppearance=Hide }
+    { 9   ;CommandButton;5940 ;8910 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Cancel=Yes;
+                                                 PushAction=LookupCancel;
+                                                 InvalidActionAppearance=Hide }
+    { 10  ;CommandButton;10780;8910 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 PushAction=FormHelp }
+    { 17  ;MenuButton   ;8360 ;8910 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 CaptionML=[ENU=&Country/Region;
+                                                            ENG=&Country/Region];
+                                                 Menu=MENUITEMS
+                                                 {
+                                                   { ID=18;
+                                                     PushAction=RunObject;
+                                                     CaptionML=[ENU=VAT Reg. No. Formats;
+                                                                ENG=VAT Reg. No. Formats];
+                                                     RunObject=Form 575;
+                                                     RunFormLinkType=OnUpdate;
+                                                     RunFormLink=Country/Region Code=FIELD(Code) }
+                                                   { ID=1040007;
+                                                     MenuItemType=Separator }
+                                                   { ID=1040008;
+                                                     ShortCutKey=F2;
+                                                     CaptionML=ENG=Edit;
+                                                     OnPush=BEGIN
+                                                              //AK 031008 -
+                                                              CurrForm.EDITABLE(NOT CurrForm.EDITABLE);
+                                                              CurrForm.UPDATE;
+                                                              //AK 031008 +
+                                                            END;
+                                                             }
+                                                 }
+                                                  }
+    { 1040006;CommandButton;220;8910;440  ;550  ;HorzGlue=Left;
+                                                 VertGlue=Bottom;
+                                                 Bitmap=7;
+                                                 CaptionML=ENG=Edit;
+                                                 ToolTipML=ENG=Press to toggle edit;
+                                                 OnPush=VAR
+                                                          ObjectType@1000000002 : 'Form,Report,Codeunit,Dataport';
+                                                        BEGIN
+                                                          //AK 031008 -
+                                                          CurrForm.EDITABLE(NOT CurrForm.EDITABLE);
+                                                          CurrForm.UPDATE;
+                                                          //AK 031008 +
+                                                        END;
+                                                         }
+  }
+  CODE
+  {
+
+    BEGIN
+    {
+      MQ2.0       Added fields "Use Online" and "B2C Customer Template"
+      MQ2.65      Added fields
+                    "Mandatory B2C Address Fields"
+                    "Mandatory B2B Address Fields"
+                    "Address Field To Load"
+      //DOC OP12513 DB 19/02/2018 - Added field "Include PCA Results".
+    }
+    END.
+  }
+}
+

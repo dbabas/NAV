@@ -1,0 +1,43 @@
+OBJECT Table 50002 Loqate Address Response
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22/11/18;
+    Time=21:20:41;
+    Modified=Yes;
+    Version List=OP14491;
+  }
+  PROPERTIES
+  {
+    LookupPageID=Page50002;
+    DrillDownPageID=Page50002;
+  }
+  FIELDS
+  {
+    { 10  ;   ;Id                  ;Text80        ;CaptionML=[ENU=Id;
+                                                              ENG=Id] }
+    { 20  ;   ;Type                ;Text30        ;CaptionML=[ENU=Type;
+                                                              ENG=Type] }
+    { 30  ;   ;Text                ;Text250       ;CaptionML=[ENU=Text;
+                                                              ENG=Text] }
+    { 40  ;   ;Highlight           ;Text30        ;CaptionML=[ENU=Highlight;
+                                                              ENG=Highlight] }
+    { 50  ;   ;Description         ;Text100       ;CaptionML=[ENU=Description;
+                                                              ENG=Description] }
+    { 60  ;   ;Sort No.            ;Integer        }
+  }
+  KEYS
+  {
+    {    ;Id                                      ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

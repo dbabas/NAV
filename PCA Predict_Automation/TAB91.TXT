@@ -1,0 +1,255 @@
+OBJECT Table 91 User Setup
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19/02/18;
+    Time=07:33:19;
+    Modified=Yes;
+    Version List=NAVW15.00,CustChg,OP12513;
+  }
+  PROPERTIES
+  {
+    OnModify=BEGIN
+               //aK 220209 +
+               //IF (UserSetup.GET(USERID)) AND (NOT UserSetup."Allow to Edit User Setup") THEN
+               //  ERROR(Text008);
+               //aK 220209 -
+             END;
+
+    OnDelete=BEGIN
+               //aK 220209 +
+               //IF (UserSetup.GET(USERID)) AND (NOT UserSetup."Allow to Edit User Setup") THEN
+               //  ERROR(Text008);
+               //aK 220209 -
+             END;
+
+    CaptionML=[ENU=User Setup;
+               ENG=User Setup];
+    LookupFormID=Form119;
+  }
+  FIELDS
+  {
+    { 1   ;   ;User ID             ;Code20        ;TableRelation=User;
+                                                   OnValidate=VAR
+                                                                LoginMgt@1000 : Codeunit 418;
+                                                              BEGIN
+                                                                LoginMgt.ValidateUserID("User ID");
+                                                              END;
+
+                                                   OnLookup=VAR
+                                                              LoginMgt@1000 : Codeunit 418;
+                                                            BEGIN
+                                                              LoginMgt.LookupUserID("User ID");
+                                                            END;
+
+                                                   ValidateTableRelation=No;
+                                                   TestTableRelation=No;
+                                                   CaptionML=[ENU=User ID;
+                                                              ENG=User ID];
+                                                   NotBlank=Yes }
+    { 2   ;   ;Allow Posting From  ;Date          ;OnValidate=BEGIN
+                                                                TESTFIELD("Do Not Update Start/End Date",FALSE);
+                                                              END;
+
+                                                   CaptionML=[ENU=Allow Posting From;
+                                                              ENG=Allow Posting From] }
+    { 3   ;   ;Allow Posting To    ;Date          ;OnValidate=BEGIN
+                                                                TESTFIELD("Do Not Update Start/End Date",FALSE);
+                                                              END;
+
+                                                   CaptionML=[ENU=Allow Posting To;
+                                                              ENG=Allow Posting To] }
+    { 4   ;   ;Register Time       ;Boolean       ;CaptionML=[ENU=Register Time;
+                                                              ENG=Register Time] }
+    { 10  ;   ;Salespers./Purch. Code;Code10      ;TableRelation=Salesperson/Purchaser.Code;
+                                                   OnValidate=VAR
+                                                                UserSetup@1000 : Record 91;
+                                                              BEGIN
+                                                                IF "Salespers./Purch. Code" <> '' THEN BEGIN
+                                                                  UserSetup.SETCURRENTKEY("Salespers./Purch. Code");
+                                                                  UserSetup.SETRANGE("Salespers./Purch. Code","Salespers./Purch. Code");
+                                                                  IF UserSetup.FIND('-') THEN
+                                                                    ERROR(Text001,"Salespers./Purch. Code",UserSetup."User ID");
+                                                                END;
+                                                              END;
+
+                                                   ValidateTableRelation=No;
+                                                   TestTableRelation=No;
+                                                   CaptionML=[ENU=Salespers./Purch. Code;
+                                                              ENG=Salespers./Purch. Code] }
+    { 11  ;   ;Approver ID         ;Code20        ;TableRelation="User Setup"."User ID";
+                                                   ValidateTableRelation=No;
+                                                   TestTableRelation=No;
+                                                   CaptionML=[ENU=Approver ID;
+                                                              ENG=Approver ID] }
+    { 12  ;   ;Sales Amount Approval Limit;Integer;OnValidate=BEGIN
+                                                                IF "Unlimited Sales Approval" AND ("Sales Amount Approval Limit" <> 0) THEN
+                                                                  ERROR(Text003,FIELDCAPTION("Sales Amount Approval Limit"),FIELDCAPTION("Unlimited Sales Approval"));
+                                                                IF "Sales Amount Approval Limit" < 0 THEN
+                                                                  ERROR(Text005);
+                                                              END;
+
+                                                   CaptionML=[ENU=Sales Amount Approval Limit;
+                                                              ENG=Sales Amount Approval Limit];
+                                                   BlankZero=Yes }
+    { 13  ;   ;Purchase Amount Approval Limit;Integer;
+                                                   OnValidate=BEGIN
+                                                                IF "Unlimited Purchase Approval" AND ("Purchase Amount Approval Limit" <> 0) THEN
+                                                                  ERROR(Text003,FIELDCAPTION("Purchase Amount Approval Limit"),FIELDCAPTION("Unlimited Purchase Approval"));
+                                                                IF "Purchase Amount Approval Limit" < 0 THEN
+                                                                  ERROR(Text005);
+                                                              END;
+
+                                                   CaptionML=[ENU=Purchase Amount Approval Limit;
+                                                              ENG=Purchase Amount Approval Limit];
+                                                   BlankZero=Yes }
+    { 14  ;   ;Unlimited Sales Approval;Boolean   ;OnValidate=BEGIN
+                                                                IF "Unlimited Sales Approval" THEN
+                                                                  "Sales Amount Approval Limit" := 0;
+                                                              END;
+
+                                                   CaptionML=[ENU=Unlimited Sales Approval;
+                                                              ENG=Unlimited Sales Approval] }
+    { 15  ;   ;Unlimited Purchase Approval;Boolean;OnValidate=BEGIN
+                                                                IF "Unlimited Purchase Approval" THEN
+                                                                  "Purchase Amount Approval Limit" := 0;
+                                                              END;
+
+                                                   CaptionML=[ENU=Unlimited Purchase Approval;
+                                                              ENG=Unlimited Purchase Approval] }
+    { 16  ;   ;Substitute          ;Code20        ;TableRelation="User Setup";
+                                                   CaptionML=[ENU=Substitute;
+                                                              ENG=Substitute] }
+    { 17  ;   ;E-Mail              ;Text100       ;CaptionML=[ENU=E-Mail;
+                                                              ENG=E-Mail] }
+    { 19  ;   ;Request Amount Approval Limit;Integer;
+                                                   OnValidate=BEGIN
+                                                                IF "Unlimited Request Approval" AND ("Request Amount Approval Limit" <> 0) THEN
+                                                                  ERROR(Text003,FIELDCAPTION("Request Amount Approval Limit"),FIELDCAPTION("Unlimited Request Approval"));
+                                                                IF "Request Amount Approval Limit" < 0 THEN
+                                                                  ERROR(Text005);
+                                                              END;
+
+                                                   CaptionML=[ENU=Request Amount Approval Limit;
+                                                              ENG=Request Amount Approval Limit];
+                                                   BlankZero=Yes }
+    { 20  ;   ;Unlimited Request Approval;Boolean ;OnValidate=BEGIN
+                                                                IF "Unlimited Request Approval" THEN
+                                                                  "Request Amount Approval Limit" := 0;
+                                                              END;
+
+                                                   CaptionML=[ENU=Unlimited Request Approval;
+                                                              ENG=Unlimited Request Approval] }
+    { 5600;   ;Allow FA Posting From;Date         ;CaptionML=[ENU=Allow FA Posting From;
+                                                              ENG=Allow FA Posting From] }
+    { 5601;   ;Allow FA Posting To ;Date          ;CaptionML=[ENU=Allow FA Posting To;
+                                                              ENG=Allow FA Posting To] }
+    { 5700;   ;Sales Resp. Ctr. Filter;Code10     ;TableRelation="Responsibility Center".Code;
+                                                   CaptionML=[ENU=Sales Resp. Ctr. Filter;
+                                                              ENG=Sales Resp. Ctr. Filter] }
+    { 5701;   ;Purchase Resp. Ctr. Filter;Code10  ;TableRelation="Responsibility Center";
+                                                   CaptionML=[ENU=Purchase Resp. Ctr. Filter;
+                                                              ENG=Purchase Resp. Ctr. Filter] }
+    { 5900;   ;Service Resp. Ctr. Filter;Code10   ;TableRelation="Responsibility Center";
+                                                   CaptionML=[ENU=Service Resp. Ctr. Filter;
+                                                              ENG=Service Resp. Ctr. Filter] }
+    { 50001;  ;Allow to Act/Dea Campaign;Boolean  ;CaptionML=ENG=Allow to Activate/De-activate Campaigns;
+                                                   Description=CCS1.0 }
+    { 50002;  ;Allow to View Card Details;Boolean ;CaptionML=ENG=Allow to View Customer Card Details;
+                                                   Description=CCS1.0 }
+    { 50003;  ;Allow to Change Shipping Agent;Boolean;
+                                                   CaptionML=ENG=Allowed to Change Shipping Agent;
+                                                   Description=CCS1.0 }
+    { 50097;  ;Handheld User       ;Boolean       ;Description=CCS1.0 }
+    { 50098;  ;Handheld USER ID    ;Integer       ;OnValidate=BEGIN
+                                                                TESTFIELD("Handheld User",TRUE);
+                                                                IF FORMAT("Handheld USER ID") <> '' THEN
+                                                                  IF STRLEN(FORMAT("Handheld USER ID")) <> 4 THEN
+                                                                    ERROR(Text006);
+                                                              END;
+
+                                                   MinValue=1;
+                                                   MaxValue=9999;
+                                                   Description=CCS1.0 }
+    { 50099;  ;Employee Code       ;Code20        ;TableRelation=Employee;
+                                                   Description=CCS1.0 }
+    { 50100;  ;Run Form            ;Integer       ;TableRelation=Object.ID WHERE (Type=CONST(Form));
+                                                   Description=CCS1.0 }
+    { 50101;  ;Allow Item Advance View;Boolean    ;CaptionML=ENG=Allow To View Item Advance Card;
+                                                   Description=CCS1.0 }
+    { 50102;  ;Allow to Reopen Orders;Boolean     ;CaptionML=ENG=Allow to Re-Open Orders;
+                                                   Description=CCS1.0 }
+    { 50103;  ;Allow to Void Card Payments;Boolean;CaptionML=ENG=Allow to Void Card Payments;
+                                                   Description=CCS1.0 }
+    { 50104;  ;Allow Item Basic View;Boolean      ;CaptionML=ENG=Allow To View Item Basic Card;
+                                                   Description=CCS1.0 }
+    { 50105;  ;Allow to Cancel Order;Boolean      ;Description=CCS1.0 }
+    { 50106;  ;Allow to Release/Re-open P/V/L;Boolean;
+                                                   CaptionML=ENG=Allow to Release/Re-open Promotion/ Vouchers/ Loyalty Points;
+                                                   Description=CCS1.0 }
+    { 50107;  ;Allow to amend Voucher Scheme;Boolean;
+                                                   Description=CCS1.0 }
+    { 50108;  ;Allow to amend Loyalty Scheme;Boolean;
+                                                   Description=CCS1.0 }
+    { 50109;  ;Allow to Setup/Delete Messages;Boolean;
+                                                   Description=CCS1.0 }
+    { 50110;  ;Allow to See All Items;Boolean     ;Description=CCS1.0 }
+    { 50111;  ;Allow to View Technical Comp.;Boolean;
+                                                   CaptionML=ENG=Allow to View Technical Complaint;
+                                                   Description=CCS1.0 }
+    { 50112;  ;Allow to Edit Item Card;Boolean    ;Description=CCS1.0 }
+    { 50113;  ;Allow to View Handheld List;Boolean;Description=CCS1.0 }
+    { 50114;  ;Allow to View Inv. Disc/Prices;Boolean;
+                                                   Description=CCS1.0 }
+    { 50115;  ;Allow to Run Update Back Order;Boolean;
+                                                   Description=CCS1.0 }
+    { 50116;  ;Allow to Run Payment Pooling;Boolean;
+                                                   CaptionML=ENG=Allow to Run Card Payment Pooling;
+                                                   Description=CCS1.0 }
+    { 50117;  ;Allow to Edit User Setup;Boolean   ;Description=CCS1.0 }
+    { 50118;  ;Do Not Update Start/End Date;Boolean;
+                                                   Description=CCS1.0 }
+    { 50119;  ;Allow to Post Purch. Invoice;Boolean;
+                                                   Description=CCS1.0 }
+    { 50120;  ;Sales Operator      ;Boolean       ;Description=CCS1.0 }
+    { 50121;  ;Date Filter         ;Date          ;FieldClass=FlowFilter;
+                                                   Description=CCS1.0 }
+    { 50134;  ;Allow Customer Advance View;Boolean;CaptionML=ENG=Allow To View Customer Advance Card;
+                                                   Description=CCS1.0 - 031109 }
+    { 50135;  ;Allow Customer Advance Edit;Boolean;CaptionML=ENG=Allow To Edit Customer Advance Card;
+                                                   Description=CCS1.0 - 031109 }
+    { 50150;  ;Allow PCA           ;Boolean       ;CaptionML=[ENU=Allow PCA;
+                                                              ENG=Allow PCA];
+                                                   Description=OP12513 }
+  }
+  KEYS
+  {
+    {    ;User ID                                 ;Clustered=Yes }
+    {    ;Salespers./Purch. Code                   }
+    {    ;Handheld USER ID                         }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+    VAR
+      Text001@1000 : TextConst 'ENU=The %1 Salesperson/Purchaser code is already assigned to another User ID %2.;ENG=The %1 Salesperson/Purchaser code is already assigned to another User ID %2.';
+      Text003@1002 : TextConst 'ENU="You cannot have both a %1 and %2. ";ENG="You cannot have both a %1 and %2. "';
+      Text004@1003 : TextConst 'ENU=The %1 User ID does not have a %2 assigned.;ENG=The %1 User ID does not have a %2 assigned.';
+      Text005@1004 : TextConst 'ENU=You cannot have approval limits less than zero.;ENG=You cannot have approval limits less than zero.';
+      Text006@1040000 : TextConst 'ENG=Handheld User ID must be 4 numeric chr.';
+      Text007@1040001 : TextConst 'ENG=Handheld User Password must be 4 numeric chr.';
+      UserSetup@1040002 : Record 91;
+      Text008@1040003 : TextConst 'ENG=You do not have permission to change user setup.';
+
+    BEGIN
+    {
+      //CCS AK 041108 - Key added [Handheld USER ID]
+      AK 031109 - Field added [Allow Customer Advance View], [Allow Customer Advance Edit]
+      //DOC OP12513 DB 19/02/2018 - Added field "Allow PCA"
+    }
+    END.
+  }
+}
+

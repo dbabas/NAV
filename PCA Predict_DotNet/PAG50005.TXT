@@ -1,0 +1,38 @@
+OBJECT Page 50005 Post Code WS Buffer
+{
+  OBJECT-PROPERTIES
+  {
+    Date=17/03/17;
+    Time=16:02:46;
+    Modified=Yes;
+    Version List=OP10248;
+  }
+  PROPERTIES
+  {
+    InsertAllowed=No;
+    DeleteAllowed=No;
+    ModifyAllowed=No;
+    SourceTable=Table18;
+    PageType=List;
+  }
+  CONTROLS
+  {
+    { 1000000000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1000000001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1000000002;2;Field  ;
+                SourceExpr=Address }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

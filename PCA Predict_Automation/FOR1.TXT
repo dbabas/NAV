@@ -1,0 +1,459 @@
+OBJECT Form 1 Company Information
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19/02/18;
+    Time=07:26:34;
+    Modified=Yes;
+    Version List=NAVW15.00,NAVGB4.00.01,OP12513;
+  }
+  PROPERTIES
+  {
+    Width=21670;
+    Height=7260;
+    CaptionML=[ENU=Company Information;
+               ENG=Company Information];
+    InsertAllowed=No;
+    DeleteAllowed=No;
+    SourceTable=Table79;
+    OnOpenForm=VAR
+                 MapMgt@1000 : Codeunit 802;
+               BEGIN
+                 RESET;
+                 IF NOT GET THEN BEGIN
+                   INIT;
+                   INSERT;
+                 END;
+
+                 IF NOT MapMgt.TestSetup THEN
+                   CurrForm.MapPoint.VISIBLE(FALSE);
+               END;
+
+  }
+  CONTROLS
+  {
+    { 1   ;TabControl   ;220  ;220  ;21230;6050 ;HorzGlue=Both;
+                                                 VertGlue=Both;
+                                                 PageNamesML=[ENU=General,Communication,Payments,Shipping,Statutory,Neutra Health;
+                                                              ENG=General,Communication,Payments,Shipping,Statutory,Neutra Health] }
+    { 2   ;TextBox      ;3850 ;990  ;5500 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr=Name }
+    { 3   ;Label        ;440  ;990  ;3300 ;440  ;ParentControl=2;
+                                                 InPage=0 }
+    { 4   ;TextBox      ;3850 ;1540 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr=Address }
+    { 5   ;Label        ;440  ;1540 ;3300 ;440  ;ParentControl=4;
+                                                 InPage=0 }
+    { 6   ;TextBox      ;3850 ;2090 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr="Address 2" }
+    { 7   ;Label        ;440  ;2090 ;3300 ;440  ;ParentControl=6;
+                                                 InPage=0 }
+    { 10  ;TextBox      ;3850 ;4290 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr="Phone No." }
+    { 11  ;Label        ;440  ;4290 ;3300 ;440  ;ParentControl=10;
+                                                 InPage=0 }
+    { 14  ;TextBox      ;3850 ;4950 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr="VAT Registration No." }
+    { 15  ;Label        ;440  ;4950 ;3300 ;440  ;ParentControl=14;
+                                                 InPage=0 }
+    { 34  ;TextBox      ;6710 ;3190 ;2640 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 NextControl=42;
+                                                 SourceExpr="Post Code" }
+    { 42  ;TextBox      ;3850 ;3740 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr="Country/Region Code" }
+    { 45  ;Label        ;440  ;3740 ;3300 ;440  ;ParentControl=42 }
+    { 76  ;TextBox      ;3850 ;5610 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr="Industrial Classification" }
+    { 77  ;Label        ;440  ;5610 ;3300 ;440  ;ParentControl=76 }
+    { 86  ;CommandButton;6710 ;3190 ;440  ;440  ;Name=MapPoint;
+                                                 ParentControl=1;
+                                                 InPage=0;
+                                                 ShowCaption=No;
+                                                 Bitmap=53;
+                                                 ToolTipML=[ENU=Display Map;
+                                                            ENG=Display Map];
+                                                 OnPush=BEGIN
+                                                          DisplayMap;
+                                                        END;
+                                                         }
+    { 1040000;TextBox   ;3850 ;2640 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr=City }
+    { 1040001;Label     ;440  ;2640 ;3300 ;440  ;ParentControl=1040000 }
+    { 1040002;TextBox   ;3850 ;3190 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=0;
+                                                 CaptionML=[ENU=County/Post Code;
+                                                            ENG=County/Post Code];
+                                                 NextControl=34;
+                                                 SourceExpr=County }
+    { 1040003;Label     ;440  ;3190 ;3300 ;440  ;ParentControl=1040002 }
+    { 33  ;PictureBox   ;9460 ;990  ;11660;5060 ;HorzGlue=Both;
+                                                 VertGlue=Both;
+                                                 ParentControl=1;
+                                                 InPage=0;
+                                                 SourceExpr=Picture }
+    { 50  ;TextBox      ;3850 ;990  ;2750 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="Phone No." }
+    { 53  ;Label        ;440  ;990  ;3300 ;440  ;ParentControl=50 }
+    { 54  ;TextBox      ;3850 ;1540 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="Fax No." }
+    { 55  ;Label        ;440  ;1540 ;3300 ;440  ;ParentControl=54 }
+    { 56  ;TextBox      ;3850 ;2200 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="E-Mail" }
+    { 57  ;Label        ;440  ;2200 ;3300 ;440  ;ParentControl=56 }
+    { 58  ;TextBox      ;3850 ;2750 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="Home Page" }
+    { 59  ;Label        ;440  ;2750 ;3300 ;440  ;ParentControl=58 }
+    { 9   ;CommandButton;6710 ;2750 ;440  ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 ShowCaption=No;
+                                                 Bitmap=20;
+                                                 ToolTipML=[ENU=Hyperlink;
+                                                            ENG=Hyperlink];
+                                                 OnPush=BEGIN
+                                                          TESTFIELD("Home Page");
+                                                          HYPERLINK("Home Page");
+                                                        END;
+                                                         }
+    { 78  ;TextBox      ;3850 ;3960 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="IC Partner Code" }
+    { 12  ;CommandButton;6710 ;2200 ;440  ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 ShowCaption=No;
+                                                 Bitmap=21;
+                                                 ToolTipML=[ENU=New Mail Message;
+                                                            ENG=New Mail Message];
+                                                 OnPush=BEGIN
+                                                          Mail.OpenNewMessage("E-Mail");
+                                                        END;
+                                                         }
+    { 79  ;Label        ;440  ;3960 ;3300 ;440  ;ParentControl=78 }
+    { 80  ;TextBox      ;3850 ;4510 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="IC Inbox Type" }
+    { 81  ;Label        ;440  ;4510 ;3300 ;440  ;ParentControl=80 }
+    { 82  ;TextBox      ;3850 ;5060 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="IC Inbox Details" }
+    { 83  ;Label        ;440  ;5060 ;3300 ;440  ;ParentControl=82 }
+    { 1040026;TextBox   ;3850 ;3410 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="Telex No." }
+    { 1040027;Label     ;440  ;3410 ;3300 ;440  ;ParentControl=1040026 }
+    { 1040044;TextBox   ;13640;2750 ;6710 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="Education Email" }
+    { 1040047;Label     ;10230;2750 ;3300 ;440  ;ParentControl=1040044 }
+    { 1040045;TextBox   ;13640;2200 ;6710 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="Education Fax No." }
+    { 1040048;Label     ;10230;2200 ;3300 ;440  ;ParentControl=1040045 }
+    { 1040046;TextBox   ;13640;1650 ;6710 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 SourceExpr="Education Phone No." }
+    { 1040049;Label     ;10230;1650 ;3300 ;440  ;ParentControl=1040046 }
+    { 1040050;Label     ;10230;1100 ;3300 ;440  ;ParentControl=1;
+                                                 InPage=1;
+                                                 ForeColor=16777215;
+                                                 BackColor=8421504;
+                                                 BackTransparent=No;
+                                                 FontBold=Yes;
+                                                 LeaderDots=No;
+                                                 CaptionML=ENG=Education }
+    { 16  ;TextBox      ;3850 ;990  ;5500 ;440  ;ParentControl=1;
+                                                 InPage=2;
+                                                 SourceExpr="Bank Name" }
+    { 17  ;Label        ;440  ;990  ;3300 ;440  ;ParentControl=16 }
+    { 22  ;TextBox      ;3850 ;2640 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=2;
+                                                 SourceExpr="Payment Routing No." }
+    { 23  ;Label        ;440  ;2640 ;3300 ;440  ;ParentControl=22 }
+    { 24  ;TextBox      ;3850 ;3300 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=2;
+                                                 SourceExpr="Giro No." }
+    { 25  ;Label        ;440  ;3300 ;3300 ;440  ;ParentControl=24 }
+    { 20  ;TextBox      ;3850 ;2090 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=2;
+                                                 SourceExpr="Bank Account No." }
+    { 21  ;Label        ;440  ;2090 ;3300 ;440  ;ParentControl=20 }
+    { 18  ;TextBox      ;3850 ;1540 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=2;
+                                                 SourceExpr="Bank Branch No." }
+    { 19  ;Label        ;440  ;1540 ;3300 ;440  ;ParentControl=18 }
+    { 72  ;TextBox      ;3850 ;3960 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=2;
+                                                 SourceExpr="SWIFT Code" }
+    { 73  ;Label        ;440  ;3960 ;3300 ;440  ;ParentControl=72 }
+    { 74  ;TextBox      ;3850 ;4510 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=2;
+                                                 SourceExpr=IBAN }
+    { 75  ;Label        ;440  ;4510 ;3300 ;440  ;ParentControl=74 }
+    { 47  ;TextBox      ;12980;990  ;2750 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Location Code" }
+    { 48  ;Label        ;9570 ;990  ;3300 ;440  ;ParentControl=47 }
+    { 35  ;TextBox      ;3850 ;990  ;5500 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Ship-to Name" }
+    { 36  ;Label        ;440  ;990  ;3300 ;440  ;ParentControl=35 }
+    { 37  ;TextBox      ;3850 ;1540 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Ship-to Address" }
+    { 38  ;Label        ;440  ;1540 ;3300 ;440  ;ParentControl=37 }
+    { 39  ;TextBox      ;3850 ;2090 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Ship-to Address 2" }
+    { 40  ;Label        ;440  ;2090 ;3300 ;440  ;ParentControl=39 }
+    { 43  ;TextBox      ;3850 ;4400 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Ship-to Contact" }
+    { 44  ;Label        ;440  ;4400 ;3300 ;440  ;ParentControl=43 }
+    { 51  ;TextBox      ;6710 ;3190 ;2640 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 NextControl=60;
+                                                 SourceExpr="Ship-to Post Code" }
+    { 13  ;TextBox      ;12980;1540 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Responsibility Center" }
+    { 41  ;Label        ;9570 ;1540 ;3300 ;440  ;ParentControl=13 }
+    { 60  ;TextBox      ;3850 ;3740 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Ship-to Country/Region Code" }
+    { 61  ;Label        ;440  ;3740 ;3300 ;440  ;ParentControl=60 }
+    { 62  ;TextBox      ;12980;2090 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Check-Avail. Period Calc." }
+    { 63  ;Label        ;9570 ;2090 ;3300 ;440  ;ParentControl=62 }
+    { 64  ;TextBox      ;12980;2640 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Check-Avail. Time Bucket" }
+    { 1040004;TextBox   ;3850 ;2640 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Ship-to City" }
+    { 65  ;Label        ;9570 ;2640 ;3300 ;440  ;ParentControl=64 }
+    { 1040005;Label     ;440  ;2640 ;3300 ;440  ;ParentControl=1040004 }
+    { 67  ;TextBox      ;12980;3190 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 DrillDown=No;
+                                                 SourceExpr="Base Calendar Code" }
+    { 1040006;TextBox   ;3850 ;3190 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 CaptionML=[ENU=Ship-to County/Post Code;
+                                                            ENG=Ship-to County/Post Code];
+                                                 NextControl=51;
+                                                 SourceExpr="Ship-to County" }
+    { 68  ;Label        ;9570 ;3190 ;3300 ;440  ;ParentControl=67 }
+    { 1040007;Label     ;440  ;3190 ;3300 ;440  ;ParentControl=1040006 }
+    { 69  ;TextBox      ;12980;3740 ;1700 ;440  ;Name=Customized Calendar;
+                                                 Editable=No;
+                                                 ParentControl=1;
+                                                 InPage=3;
+                                                 DrillDown=Yes;
+                                                 CaptionML=[ENU=Customized Calendar;
+                                                            ENG=Customized Calendar];
+                                                 SourceExpr=CalendarMgmt.CustomizedCalendarExistText(CustomizedCalendar."Source Type"::Company,'','',"Base Calendar Code");
+                                                 OnDrillDown=BEGIN
+                                                               CurrForm.SAVERECORD;
+                                                               TESTFIELD("Base Calendar Code");
+                                                               CalendarMgmt.ShowCustomizedCalendar(CustomizedCalEntry."Source Type"::Company,'','',"Base Calendar Code");
+                                                             END;
+                                                              }
+    { 71  ;Label        ;9570 ;3740 ;3300 ;440  ;ParentControl=69;
+                                                 InPage=3;
+                                                 CaptionML=[ENU=Customized Calendar;
+                                                            ENG=Customized Calendar] }
+    { 84  ;TextBox      ;12980;4290 ;1700 ;440  ;ParentControl=1;
+                                                 InPage=3;
+                                                 SourceExpr="Cal. Convergence Time Frame" }
+    { 85  ;Label        ;9570 ;4290 ;3300 ;440  ;ParentControl=84 }
+    { 1040008;TextBox   ;3850 ;3740 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 CaptionML=[ENU=Registered County/Post Code;
+                                                            ENG=Registered County/Post Code];
+                                                 SourceExpr="Registered County" }
+    { 1040014;Label     ;440  ;3740 ;3300 ;440  ;ParentControl=1040008 }
+    { 1040009;TextBox   ;6710 ;3740 ;2640 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 SourceExpr="Registered Post Code" }
+    { 1040010;TextBox   ;3850 ;3190 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 SourceExpr="Registered City" }
+    { 1040013;Label     ;440  ;3190 ;3300 ;440  ;ParentControl=1040010 }
+    { 1040011;TextBox   ;3850 ;2640 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 SourceExpr="Registered Address 2" }
+    { 1040012;Label     ;440  ;2640 ;3300 ;440  ;ParentControl=1040011 }
+    { 1040015;TextBox   ;3850 ;2090 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 SourceExpr="Registered Address" }
+    { 1040016;Label     ;440  ;2090 ;3300 ;440  ;ParentControl=1040015 }
+    { 1040017;TextBox   ;3850 ;1540 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 SourceExpr="Registered Name" }
+    { 1040018;Label     ;440  ;1540 ;3300 ;440  ;ParentControl=1040017 }
+    { 1040019;TextBox   ;3850 ;990  ;2750 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 SourceExpr="Registration No." }
+    { 1040020;Label     ;440  ;990  ;3300 ;440  ;ParentControl=1040019 }
+    { 1101100000;TextBox;3850 ;4400 ;1320 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 SourceExpr="Branch Number" }
+    { 1101100001;Label  ;440  ;4400 ;3300 ;440  ;ParentControl=1101100000 }
+    { 1101100002;TextBox;3850 ;4950 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=4;
+                                                 SourceExpr="Contact Name" }
+    { 1101100003;Label  ;440  ;4950 ;3300 ;440  ;ParentControl=1101100002 }
+    { 1040021;TextBox   ;5170 ;1540 ;3960 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 SourceExpr="Repeat Order Email Sender Name" }
+    { 1040022;Label     ;440  ;1540 ;4620 ;440  ;ParentControl=1040021 }
+    { 1040023;TextBox   ;5170 ;2090 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 SourceExpr="Repeat Order Email Sender Addr" }
+    { 1040024;Label     ;440  ;2090 ;4620 ;440  ;ParentControl=1040023 }
+    { 1040025;Label     ;440  ;990  ;3300 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 ForeColor=16777215;
+                                                 BackColor=8421504;
+                                                 BackTransparent=No;
+                                                 FontBold=Yes;
+                                                 LeaderDots=No;
+                                                 CaptionML=ENG=Repeat Order Email }
+    { 1040028;TextBox   ;5170 ;3410 ;2750 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 SourceExpr="Color Code" }
+    { 1040029;Label     ;440  ;3410 ;4620 ;440  ;ParentControl=1040028 }
+    { 1040030;Label     ;440  ;2860 ;3300 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 ForeColor=16777215;
+                                                 BackColor=8421504;
+                                                 BackTransparent=No;
+                                                 FontBold=Yes;
+                                                 LeaderDots=No;
+                                                 CaptionML=ENG=General }
+    { 1040038;TextBox   ;5170 ;3960 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 SourceExpr="Purchase Department Email" }
+    { 1040039;Label     ;440  ;3960 ;4620 ;440  ;ParentControl=1040038 }
+    { 1040040;TextBox   ;5170 ;4510 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 SourceExpr="Purchase Department Fax" }
+    { 1040041;Label     ;440  ;4510 ;4620 ;440  ;ParentControl=1040040 }
+    { 1040042;TextBox   ;5170 ;5060 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 SourceExpr="Purchase Department Phone No." }
+    { 1040043;Label     ;440  ;5060 ;4620 ;440  ;ParentControl=1040042 }
+    { 1040035;TextBox   ;15510;1430 ;5500 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 SourceExpr="PCA Predict Key" }
+    { 1040036;Label     ;12100;1430 ;3300 ;440  ;ParentControl=1040035 }
+    { 1040037;Label     ;12100;880  ;3300 ;440  ;ParentControl=1;
+                                                 InPage=5;
+                                                 ForeColor=16777215;
+                                                 BackColor=8421504;
+                                                 BackTransparent=No;
+                                                 FontBold=Yes;
+                                                 LeaderDots=No;
+                                                 CaptionML=[ENU=PCA Predict;
+                                                            ENG=PCA Predict] }
+    { 26  ;CommandButton;9570 ;6490 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Default=Yes;
+                                                 PushAction=LookupOK;
+                                                 InvalidActionAppearance=Hide }
+    { 27  ;CommandButton;11990;6490 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Cancel=Yes;
+                                                 PushAction=LookupCancel;
+                                                 InvalidActionAppearance=Hide }
+    { 32  ;CommandButton;19250;6490 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 PushAction=FormHelp }
+    { 28  ;MenuButton   ;16830;6490 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 CaptionML=[ENU=&Picture;
+                                                            ENG=&Picture];
+                                                 Menu=MENUITEMS
+                                                 {
+                                                   { ID=29;
+                                                     Ellipsis=Yes;
+                                                     CaptionML=[ENU=Import;
+                                                                ENG=Import];
+                                                     OnPush=BEGIN
+                                                              PictureExists := Picture.HASVALUE;
+                                                              IF Picture.IMPORT('*.BMP',TRUE) = '' THEN
+                                                                EXIT;
+                                                              IF PictureExists THEN
+                                                                IF NOT CONFIRM(Text001,FALSE) THEN
+                                                                  EXIT;
+                                                              CurrForm.SAVERECORD;
+                                                            END;
+                                                             }
+                                                   { ID=30;
+                                                     Ellipsis=Yes;
+                                                     CaptionML=[ENU=E&xport;
+                                                                ENG=E&xport];
+                                                     OnPush=BEGIN
+                                                              IF Picture.HASVALUE THEN
+                                                                Picture.EXPORT('*.BMP',TRUE);
+                                                            END;
+                                                             }
+                                                   { ID=31;
+                                                     CaptionML=[ENU=Delete;
+                                                                ENG=Delete];
+                                                     OnPush=BEGIN
+                                                              IF Picture.HASVALUE THEN
+                                                                IF CONFIRM(Text002,FALSE) THEN BEGIN
+                                                                  CLEAR(Picture);
+                                                                  CurrForm.SAVERECORD;
+                                                                END;
+                                                            END;
+                                                             }
+                                                 }
+                                                  }
+    { 66  ;MenuButton   ;14410;6490 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 CaptionML=[ENU=&Company;
+                                                            ENG=&Company];
+                                                 Menu=MENUITEMS
+                                                 {
+                                                   { ID=70;
+                                                     PushAction=RunObject;
+                                                     CaptionML=[ENU=Responsibility Centers;
+                                                                ENG=Responsibility Centres];
+                                                     RunObject=Form 5714 }
+                                                 }
+                                                  }
+  }
+  CODE
+  {
+    VAR
+      Text001@1000 : TextConst 'ENU=Do you want to replace the existing picture?;ENG=Do you want to replace the existing picture?';
+      Text002@1001 : TextConst 'ENU=Do you want to delete the picture?;ENG=Do you want to delete the picture?';
+      CustomizedCalEntry@1007 : Record 7603;
+      CustomizedCalendar@1005 : Record 7602;
+      CalendarMgmt@1004 : Codeunit 7600;
+      Mail@1002 : Codeunit 397;
+      PictureExists@1003 : Boolean;
+
+    BEGIN
+    {
+      //DOC OP12513 DB 19/02/2018 - Added new field "PCA Predict Key"
+    }
+    END.
+  }
+}
+

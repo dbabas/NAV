@@ -1,0 +1,62 @@
+OBJECT Form 50220 Post Code Validation
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19/02/18;
+    Time=08:24:18;
+    Modified=Yes;
+    Version List=OP12513;
+  }
+  PROPERTIES
+  {
+    Width=9790;
+    Height=6710;
+    Editable=No;
+    TableBoxID=1000000000;
+    SourceTable=Table18;
+  }
+  CONTROLS
+  {
+    { 1000000000;TableBox;220 ;220  ;9350 ;5500 ;HorzGlue=Both;
+                                                 VertGlue=Both }
+    { 1000000001;TextBox;0    ;0    ;1700 ;0    ;ParentControl=1000000000;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Search Name" }
+    { 1000000002;Label  ;0    ;0    ;0    ;0    ;ParentControl=1000000001;
+                                                 InColumnHeading=Yes }
+    { 1000000003;TextBox;0    ;0    ;4400 ;0    ;HorzGlue=Both;
+                                                 ParentControl=1000000000;
+                                                 InColumn=Yes;
+                                                 SourceExpr=Address }
+    { 1000000004;Label  ;0    ;0    ;0    ;0    ;ParentControl=1000000003;
+                                                 InColumnHeading=Yes }
+    { 1040000;TextBox   ;5715 ;440  ;4400 ;440  ;ParentControl=1000000000;
+                                                 InColumn=Yes;
+                                                 SourceExpr=Name }
+    { 1040001;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040000;
+                                                 InColumnHeading=Yes }
+    { 1000000005;CommandButton;2530;5940;2200;550;
+                                                 HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Default=Yes;
+                                                 PushAction=LookupOK;
+                                                 InvalidActionAppearance=Hide }
+    { 1000000006;CommandButton;4950;5940;2200;550;
+                                                 HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Cancel=Yes;
+                                                 PushAction=LookupCancel;
+                                                 InvalidActionAppearance=Hide }
+    { 1000000007;CommandButton;7370;5940;2200;550;
+                                                 HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 PushAction=FormHelp }
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

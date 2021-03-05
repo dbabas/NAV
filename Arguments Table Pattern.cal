@@ -1,0 +1,73 @@
+OBJECT Table 50008 Argument Table
+{
+  OBJECT-PROPERTIES
+  {
+    Date=02/12/17;
+    Time=23:33:34;
+    Modified=Yes;
+    Version List=Argument Pattern;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;Arg1                ;Text30         }
+    { 2   ;   ;Arg2                ;Integer        }
+    { 3   ;   ;Arg3                ;Decimal        }
+  }
+  KEYS
+  {
+    {    ;Arg1                                    ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+
+OBJECT Codeunit 50008 Arguments Table Sample
+{
+  OBJECT-PROPERTIES
+  {
+    Date=02/12/17;
+    Time=23:46:05;
+    Modified=Yes;
+    Version List=Argument Pattern;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+            CallShowArgs;
+          END;
+
+  }
+  CODE
+  {
+
+    LOCAL PROCEDURE CallShowArgs@2();
+    VAR
+      Arguments@1000 : Record 50008;
+    BEGIN
+      Arguments.Arg1 := 'This is a test';
+      Arguments.Arg2 := 1;
+      Arguments.Arg3 := 2.35;
+
+      ShowArgs(Arguments);
+    END;
+
+    LOCAL PROCEDURE ShowArgs@1(VAR Arguments@1000 : Record 50008);
+    BEGIN
+      MESSAGE(Arguments.Arg1+' '+FORMAT(Arguments.Arg2,0,9)+' '+FORMAT(Arguments.Arg3,0,9));
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

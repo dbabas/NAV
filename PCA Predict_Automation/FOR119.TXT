@@ -1,0 +1,321 @@
+OBJECT Form 119 User Setup
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19/02/18;
+    Time=07:33:03;
+    Modified=Yes;
+    Version List=NAVW14.00,CustChg,OP12513;
+  }
+  PROPERTIES
+  {
+    Width=17930;
+    Height=9900;
+    CaptionML=[ENU=User Setup;
+               ENG=User Setup];
+    TableBoxID=1;
+    SourceTable=Table91;
+    OnOpenForm=BEGIN
+                 CurrForm.EDITABLE(FALSE);
+                 IF (UserSetup.GET(USERID))  AND (UserSetup."Allow to Edit User Setup") THEN
+                   CurrForm.EDITABLE(TRUE);
+                 ApplyColor();
+               END;
+
+  }
+  CONTROLS
+  {
+    { 1   ;TableBox     ;220  ;220  ;17490;8690 ;HorzGlue=Both;
+                                                 VertGlue=Both;
+                                                 HeadingHeight=1320;
+                                                 InlineEditing=Yes }
+    { 2   ;TextBox      ;0    ;0    ;1650 ;0    ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="User ID" }
+    { 3   ;Label        ;0    ;0    ;0    ;0    ;ParentControl=2;
+                                                 InColumnHeading=Yes }
+    { 1040014;TextBox   ;1852 ;2750 ;4400 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="E-Mail" }
+    { 1040015;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040014;
+                                                 InColumnHeading=Yes }
+    { 1040035;TextBox   ;6032 ;3080 ;2420 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Salespers./Purch. Code" }
+    { 1040036;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040035;
+                                                 InColumnHeading=Yes }
+    { 4   ;TextBox      ;0    ;0    ;1650 ;0    ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Allow Posting From" }
+    { 5   ;Label        ;0    ;0    ;0    ;0    ;ParentControl=4;
+                                                 InColumnHeading=Yes }
+    { 6   ;TextBox      ;0    ;0    ;1650 ;0    ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Allow Posting To" }
+    { 7   ;Label        ;0    ;0    ;0    ;0    ;ParentControl=6;
+                                                 InColumnHeading=Yes }
+    { 8   ;CheckBox     ;6904 ;0    ;1100 ;0    ;Visible=No;
+                                                 ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Register Time" }
+    { 9   ;Label        ;0    ;0    ;0    ;0    ;ParentControl=8;
+                                                 InColumnHeading=Yes }
+    { 15  ;TextBox      ;7752 ;330  ;1650 ;440  ;Visible=No;
+                                                 ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Sales Resp. Ctr. Filter" }
+    { 16  ;Label        ;0    ;0    ;0    ;0    ;ParentControl=15;
+                                                 InColumnHeading=Yes }
+    { 17  ;TextBox      ;8705 ;440  ;1650 ;440  ;Visible=No;
+                                                 ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Purchase Resp. Ctr. Filter" }
+    { 18  ;Label        ;0    ;0    ;0    ;0    ;ParentControl=17;
+                                                 InColumnHeading=Yes }
+    { 21  ;TextBox      ;11986;770  ;1650 ;440  ;Visible=No;
+                                                 ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Service Resp. Ctr. Filter" }
+    { 22  ;Label        ;0    ;0    ;0    ;0    ;ParentControl=21;
+                                                 InColumnHeading=Yes }
+    { 1040000;CheckBox  ;4920 ;2090 ;1980 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Act/Dea Campaign" }
+    { 1040001;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040000;
+                                                 InColumnHeading=Yes }
+    { 1040027;CheckBox  ;19735;3520 ;2640 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Release/Re-open P/V/L" }
+    { 1040028;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040027;
+                                                 InColumnHeading=Yes }
+    { 1040029;CheckBox  ;22375;3520 ;2420 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to amend Voucher Scheme" }
+    { 1040030;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040029;
+                                                 InColumnHeading=Yes }
+    { 1040031;CheckBox  ;21330;3520 ;2090 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to amend Loyalty Scheme" }
+    { 1040032;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040031;
+                                                 InColumnHeading=Yes }
+    { 1040002;CheckBox  ;23420;5500 ;2200 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Change Shipping Agent" }
+    { 1040003;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040002;
+                                                 InColumnHeading=Yes }
+    { 1040008;CheckBox  ;16034;3300 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Reopen Orders" }
+    { 1040009;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040008;
+                                                 InColumnHeading=Yes }
+    { 1040025;CheckBox  ;27226;4290 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Cancel Order" }
+    { 1040026;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040025;
+                                                 InColumnHeading=Yes }
+    { 1040017;CheckBox  ;30774;3300 ;3300 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 CaptionML=ENG=Allow to View Customer Credit Card Payment Details;
+                                                 SourceExpr="Allow to View Card Details" }
+    { 1040018;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040017;
+                                                 InColumnHeading=Yes }
+    { 1040019;CheckBox  ;34074;2310 ;2640 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 CaptionML=ENG=Allow to Void Credit Card Payments;
+                                                 SourceExpr="Allow to Void Card Payments" }
+    { 1040020;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040019;
+                                                 InColumnHeading=Yes }
+    { 1040021;CheckBox  ;20135;2860 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow Item Basic View" }
+    { 1040022;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040021;
+                                                 InColumnHeading=Yes }
+    { 1040006;CheckBox  ;14976;2200 ;2177 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow Item Advance View" }
+    { 1040007;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040006;
+                                                 InColumnHeading=Yes }
+    { 1040041;CheckBox  ;42492;5170 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Edit Item Card" }
+    { 1040042;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040041;
+                                                 InColumnHeading=Yes }
+    { 1040037;CheckBox  ;39529;2970 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to See All Items" }
+    { 1040038;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040037;
+                                                 InColumnHeading=Yes }
+    { 1040039;CheckBox  ;40953;3410 ;2090 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to View Technical Comp." }
+    { 1040040;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040039;
+                                                 InColumnHeading=Yes }
+    { 1040033;CheckBox  ;36852;4290 ;2200 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Setup/Delete Messages" }
+    { 1040034;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040033;
+                                                 InColumnHeading=Yes }
+    { 1040045;CheckBox  ;49662;4400 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to View Inv. Disc/Prices" }
+    { 1040046;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040045;
+                                                 InColumnHeading=Yes }
+    { 1040043;CheckBox  ;49942;5610 ;2090 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to View Handheld List" }
+    { 1040044;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040043;
+                                                 InColumnHeading=Yes }
+    { 1040047;CheckBox  ;53314;3080 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Run Update Back Order" }
+    { 1040048;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040047;
+                                                 InColumnHeading=Yes }
+    { 1040049;CheckBox  ;55325;4730 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Run Payment Pooling" }
+    { 1040050;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040049;
+                                                 InColumnHeading=Yes }
+    { 1040051;CheckBox  ;56965;4180 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Post Purch. Invoice" }
+    { 1040052;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040051;
+                                                 InColumnHeading=Yes }
+    { 1040053;CheckBox  ;58976;3300 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow Customer Advance View" }
+    { 1040054;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040053;
+                                                 InColumnHeading=Yes }
+    { 1040055;CheckBox  ;60676;3300 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow Customer Advance Edit" }
+    { 1040056;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040055;
+                                                 InColumnHeading=Yes }
+    { 1040010;CheckBox  ;18283;4070 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Handheld User" }
+    { 1040011;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040010;
+                                                 InColumnHeading=Yes }
+    { 1040057;CheckBox  ;63791;770  ;1700 ;440  ;Visible=No;
+                                                 ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow to Edit User Setup" }
+    { 1040058;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040057;
+                                                 InColumnHeading=Yes }
+    { 1040012;TextBox   ;19983;4070 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Handheld USER ID" }
+    { 1040013;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040012;
+                                                 InColumnHeading=Yes }
+    { 1040004;TextBox   ;14526;2750 ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 SourceExpr="Run Form" }
+    { 1040005;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040004;
+                                                 InColumnHeading=Yes }
+    { 1040059;CheckBox  ;69242;880  ;1700 ;440  ;ParentControl=1;
+                                                 InColumn=Yes;
+                                                 ShowCaption=No;
+                                                 SourceExpr="Allow PCA" }
+    { 1040060;Label     ;0    ;0    ;0    ;0    ;ParentControl=1040059;
+                                                 InColumnHeading=Yes }
+    { 12  ;CommandButton;10670;9130 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Default=Yes;
+                                                 PushAction=LookupOK;
+                                                 InvalidActionAppearance=Hide }
+    { 13  ;CommandButton;13090;9130 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 Cancel=Yes;
+                                                 PushAction=LookupCancel;
+                                                 InvalidActionAppearance=Hide }
+    { 14  ;CommandButton;15510;9130 ;2200 ;550  ;HorzGlue=Right;
+                                                 VertGlue=Bottom;
+                                                 PushAction=FormHelp }
+    { 1040016;Label     ;220  ;9130 ;3300 ;440  ;VertGlue=Bottom;
+                                                 ForeColor=8388608;
+                                                 FontBold=Yes;
+                                                 LeaderDots=No;
+                                                 CaptionML=ENG=(Press F2 for Edit) }
+    { 1040023;CommandButton;4950;9020;660 ;660  ;Name=CmdColorNutriGold;
+                                                 HorzGlue=Both;
+                                                 VertGlue=Top;
+                                                 Visible=No;
+                                                 Enabled=No;
+                                                 Focusable=No;
+                                                 FocusOnClick=No;
+                                                 ShowCaption=No;
+                                                 ForeColor=255;
+                                                 BackColor=65535;
+                                                 BackTransparent=No;
+                                                 Border=No }
+    { 1040024;CommandButton;4070;9020;660 ;660  ;Name=CmdColorBC;
+                                                 HorzGlue=Both;
+                                                 VertGlue=Top;
+                                                 Visible=No;
+                                                 Enabled=No;
+                                                 Focusable=No;
+                                                 FocusOnClick=No;
+                                                 ShowCaption=No;
+                                                 ForeColor=255;
+                                                 BackColor=16711680;
+                                                 BackTransparent=No;
+                                                 Border=No }
+  }
+  CODE
+  {
+    VAR
+      UserSetup@1040000 : Record 91;
+
+    PROCEDURE ApplyColor@1040000();
+    VAR
+      ComInfo@1040000 : Record 79;
+    BEGIN
+      //CCS 311008 -
+      ComInfo.GET();
+      CurrForm.CmdColorBC.XPOS := 0;
+      CurrForm.CmdColorBC.YPOS := 0;
+      CurrForm.CmdColorBC.WIDTH := CurrForm.WIDTH;
+      CurrForm.CmdColorBC.HEIGHT := 250;
+      CurrForm.CmdColorNutriGold.XPOS := 0;
+      CurrForm.CmdColorNutriGold.YPOS := 0;
+      CurrForm.CmdColorNutriGold.WIDTH := CurrForm.WIDTH;
+      CurrForm.CmdColorNutriGold.HEIGHT := 250;
+
+      CASE ComInfo."Color Code" OF
+        ComInfo."Color Code"::Blue: CurrForm.CmdColorBC.VISIBLE(TRUE);
+        ComInfo."Color Code"::Yellow:  CurrForm.CmdColorNutriGold.VISIBLE(TRUE);
+      END;
+      //CCS 311008 +
+    END;
+
+    BEGIN
+    {
+      //DOC OP12513 DB 19/02/2018 - Added field "Allow PCA"
+    }
+    END.
+  }
+}
+

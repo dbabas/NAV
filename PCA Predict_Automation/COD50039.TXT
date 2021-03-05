@@ -1,0 +1,275 @@
+OBJECT Codeunit 50039 PCA Predict Management
+{
+  OBJECT-PROPERTIES
+  {
+    Date=20/02/18;
+    Time=16:03:14;
+    Modified=Yes;
+    Version List=OP12513;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      CompanyInformation@1040000 : Record 79;
+      ErrNoAddressesRetrieved@1040002 : TextConst 'ENU=No addresses have been retrieved.\Please check if you need to top-up your PCA account.;ENG=No addresses have been retrieved.\Please check if you need to top-up your PCA account.';
+      ErrNotAllowedToUsePCA@1040003 : TextConst 'ENU=You are not allowed to search for postcodes.;ENG=You are not allowed to search for postcodes.';
+      ErrWebServiceFailed@1040004 : TextConst 'ENU=PostcodeAnywhere Web service call failed;ENG=PostcodeAnywhere Web service call failed';
+      ErrUserNotExist@1040005 : TextConst 'ENU=The user %1 doesn''t exist on User Setup.;ENG=The user %1 doesn''t exist on User Setup.';
+      ErrMissingCountrySetup@1040001 : TextConst 'ENU="""Include PCA Results"" must be selected for at least one country.";ENG="""Include PCA Results"" must be selected for at least one country."';
+
+    PROCEDURE GetAddress@1000000001(VAR PostCode@1000000000 : Code[20];VAR BuildingNumber@1040002 : Code[10];VAR BuildingName@1040001 : Text[50];VAR Address@1000000001 : Text[50];VAR "Address 2"@1000000002 : Text[50];VAR City@1000000004 : Text[30];VAR County@1040003 : Text[30];VAR Country@1000000005 : Code[10]);
+    VAR
+      XMLDoc@1000000007 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{88D96A05-F192-11D4-A65F-0040963251E5}:'Microsoft XML, v6.0'.DOMDocument60";
+      XMLDocNodeList@1000000008 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNodeList2@1000000009 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNodeList3@1000000020 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNode@1000000010 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      XMLDocNode2@1000000011 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      XMLDocNode3@1000000021 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      AttributeList@1000000012 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF83-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNamedNodeMap";
+      Attribute@1000000013 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      TempCust@1000000014 : TEMPORARY Record 18;
+      URLString@1000000015 : Text[1024];
+      i@1000000016 : Integer;
+      j@1000000017 : Integer;
+      RecCounter@1000000018 : Integer;
+      Container@1000000019 : Text[1024];
+      CountriesString@1040000 : Text[250];
+    BEGIN
+      IF NOT GUIALLOWED THEN
+        EXIT;
+
+      CheckUser;
+
+      IF NOT CompanyInformation.GET THEN
+        CompanyInformation.INIT;
+
+      URLString := 'http://services.postcodeanywhere.co.uk/Capture/Interactive/Find/v1.00/dataset.ws?';
+      URLString += '&Key=' + EncodeUri(CompanyInformation."PCA Predict Key");
+      URLString += '&Text=' + EncodeUri(BuildingNumber+' '+PostCode);
+      URLString += '&Countries=' + EncodeUri(BuildCountriesString); //PCA uses GB not UK. If client use UK this code must be change
+      URLString += '&Language=' + EncodeUri('en');
+
+      CLEAR(XMLDoc);
+      IF NOT WSCall_Rest(URLString,XMLDoc) THEN
+        ERROR(ErrWebServiceFailed);
+      XMLDocNodeList := XMLDoc.getElementsByTagName('NewDataSet');
+      XMLDocNode := XMLDocNodeList.item(0);
+      XMLDocNodeList2 := XMLDocNode.childNodes;
+      XMLDocNode2 := XMLDocNodeList2.item(0);
+      XMLDocNodeList3 := XMLDocNode2.childNodes;
+      FOR i :=0 TO XMLDocNodeList3.length-1 DO BEGIN
+        XMLDocNode3 := XMLDocNodeList3.item(i);
+        IF XMLDocNode3.nodeName = 'Id' THEN
+          Container := XMLDocNode3.text;
+        IF (XMLDocNode3.nodeName = 'Type') AND (XMLDocNode3.text<>'Address') THEN
+          URLString += '&Container=' + EncodeUri(Container);
+      END;
+
+      CLEAR(XMLDoc);
+      CLEAR(XMLDocNodeList);
+      CLEAR(XMLDocNodeList2);
+      CLEAR(XMLDocNodeList3);
+      CLEAR(XMLDocNode);
+      CLEAR(XMLDocNode2);
+      CLEAR(XMLDocNode2);
+      CLEAR(AttributeList);
+      CLEAR(Attribute);
+
+      IF NOT WSCall_Rest(URLString,XMLDoc) THEN
+        ERROR(ErrWebServiceFailed);
+
+      XMLDocNodeList := XMLDoc.getElementsByTagName('NewDataSet');
+      XMLDocNode := XMLDocNodeList.item(0);
+      XMLDocNodeList2 := XMLDocNode.childNodes;
+
+      RecCounter :=1;
+      FOR i:=0 TO XMLDocNodeList2.length-1 DO BEGIN
+        XMLDocNode2 := XMLDocNodeList2.item(i);
+        XMLDocNodeList3 := XMLDocNode2.childNodes;
+        FOR j:=0 TO XMLDocNodeList3.length-1 DO BEGIN
+          XMLDocNode3 := XMLDocNodeList3.item(j);
+          TempCust."No." := FORMAT(RecCounter);
+          RecCounter +=1;
+          CASE XMLDocNode3.nodeName OF
+            'Id': TempCust."Search Name" := COPYSTR(XMLDocNode3.text,1,30);
+            'Text': TempCust.Address := COPYSTR(XMLDocNode3.text,1,50);
+            'Description': TempCust.Name := COPYSTR(XMLDocNode2.text,1,50);
+          END;
+        END;
+        TempCust.INSERT;
+      END;
+
+      IF NOT TempCust.FINDFIRST THEN  //not use ISEMPTY to set the cursor on the first entry
+        ERROR(ErrNoAddressesRetrieved);
+
+      IF FORM.RUNMODAL(FORM::"Post Code Validation" ,TempCust)=ACTION::LookupOK THEN
+        GetAddressDetails(TempCust."Search Name",PostCode,BuildingNumber,
+                           BuildingName,Address,"Address 2",City,County,Country);
+    END;
+
+    LOCAL PROCEDURE GetAddressDetails@1000000003(ID@1000000000 : Text[30];VAR PostCode@1000000001 : Code[10];VAR BuildingNumber@1040003 : Code[10];VAR BuildingName@1040004 : Text[50];VAR Address@1000000002 : Text[50];VAR "Address 2"@1000000003 : Text[50];VAR City@1000000005 : Text[30];VAR County@1040005 : Text[30];VAR Country@1000000006 : Code[10]);
+    VAR
+      XMLDoc@1000000007 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{88D96A05-F192-11D4-A65F-0040963251E5}:'Microsoft XML, v6.0'.DOMDocument60";
+      XMLDocNodeList@1000000018 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNodeList2@1000000017 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNodeList3@1000000012 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF82-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNodeList";
+      XMLDocNode@1000000016 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      XMLDocNode2@1000000015 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      XMLDocNode3@1000000013 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{2933BF80-7B36-11D2-B20E-00C04F983E60}:'Microsoft XML, v6.0'.IXMLDOMNode";
+      URLString@1000000011 : Text[1024];
+      i@1000000010 : Integer;
+      j@1000000009 : Integer;
+      RecCounter@1000000008 : Integer;
+      Lang@1040001 : Code[10];
+      Line@1040000 : ARRAY [5] OF Text[50];
+    BEGIN
+      URLString := 'http://services.postcodeanywhere.co.uk/Capture/Interactive/Retrieve/v1.00/dataset.ws?';
+      URLString += '&Key=' + EncodeUri(CompanyInformation."PCA Predict Key");
+      URLString += '&Id=' + EncodeUri(ID);
+
+      CLEAR(XMLDoc);
+      IF NOT WSCall_Rest(URLString,XMLDoc) THEN
+        ERROR(ErrWebServiceFailed);
+      XMLDocNodeList := XMLDoc.getElementsByTagName('NewDataSet');
+      XMLDocNode := XMLDocNodeList.item(0);
+      XMLDocNodeList2 := XMLDocNode.childNodes;
+      FOR i:=0 TO XMLDocNodeList2.length-1 DO BEGIN
+        XMLDocNode2 := XMLDocNodeList2.item(i);
+        IF XMLDocNode2.nodeName = 'Data' THEN BEGIN
+          XMLDocNodeList3 := XMLDocNode2.childNodes;
+          IF Lang<>'ENG'THEN BEGIN
+            FOR j:=0 TO XMLDocNodeList3.length-1 DO BEGIN
+              XMLDocNode3 := XMLDocNodeList3.item(j);
+              CASE XMLDocNode3.nodeName OF
+                'PostalCode': PostCode := COPYSTR(XMLDocNode3.text,1,20);
+                'Line1': Line[1] := COPYSTR(XMLDocNode3.text,1,50);
+                'Line2': Line[2] := COPYSTR(XMLDocNode3.text,1,50);
+                'Line3': Line[3] := COPYSTR(XMLDocNode3.text,1,50);
+                'Line4': Line[4] := COPYSTR(XMLDocNode3.text,1,50);
+                'Line5': Line[5] := COPYSTR(XMLDocNode3.text,1,50);
+                'City': City := COPYSTR(XMLDocNode3.text,1,30);
+                'Province': County := COPYSTR(XMLDocNode3.text,1,30);
+                'CountryIso2': Country := XMLDocNode3.text;
+                'Language': Lang := XMLDocNode3.text;
+                'BuildingNumber': BuildingNumber := COPYSTR(XMLDocNode3.text,1,10);
+                'BuildingName': BuildingName := COPYSTR(XMLDocNode3.text,1,50);
+              END;
+            END;
+            IF (Line[3]<>'') OR (Line[4]<>'') OR (Line[5]<>'') THEN
+              UpdateCustAddress(Line,Address,"Address 2")
+            ELSE BEGIN
+              Address := Line[1];
+              "Address 2" := Line[2];
+            END;
+          END;
+        END;
+      END;
+    END;
+
+    LOCAL PROCEDURE EncodeUri@1000000000(Uri@1000000000 : Text[80]) EncodedUri : Text[250];
+    VAR
+      HexDigits@1000000002 : Text[30];
+      i@1000000003 : Integer;
+      b@1000000004 : Integer;
+    BEGIN
+      HexDigits := '0123456789ABCDEF';
+      EncodedUri := '';
+      FOR i:=1 TO STRLEN(Uri) DO
+      BEGIN
+        b := Uri[i];
+        EncodedUri := EncodedUri + '%  ';
+        EncodedUri[STRLEN(EncodedUri)-1] := HexDigits[(b DIV 16)+1];
+        EncodedUri[STRLEN(EncodedUri)] := HexDigits[(b MOD 16)+1];
+      END;
+      EXIT(EncodedUri);
+    END;
+
+    LOCAL PROCEDURE WSCall_Rest@1000000002(URL@1000000000 : Text[1024];VAR XMLDoc@1000000001 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{88D96A05-F192-11D4-A65F-0040963251E5}:'Microsoft XML, v6.0'.DOMDocument60") : Boolean;
+    VAR
+      XMLRequest@1000000002 : Automation "{F5078F18-C551-11D3-89B9-0000F81FE221} 6.0:{88D96A0A-F192-11D4-A65F-0040963251E5}:'Microsoft XML, v6.0'.XMLHTTP60";
+    BEGIN
+      CREATE(XMLRequest);
+      CREATE(XMLDoc);
+      XMLRequest.open('GET',URL,FALSE);
+      XMLRequest.setRequestHeader('Content-type', 'text/xml; charset=utf-8');
+      XMLRequest.send();
+
+      IF XMLRequest.status=200 THEN
+      BEGIN
+        XMLDoc := XMLRequest.responseXML;
+        EXIT(TRUE);
+      END ELSE BEGIN
+        EXIT(FALSE);
+      END;
+    END;
+
+    LOCAL PROCEDURE UpdateCustAddress@1040007(VAR Line@1000000004 : ARRAY [5] OF Text[50];VAR Address@1000000006 : Text[50];VAR "Address 2"@1000000005 : Text[50]);
+    VAR
+      i@1000000000 : Integer;
+      Address1Full@1000000001 : Boolean;
+      Address2Full@1000000002 : Boolean;
+    BEGIN
+      Address :='';
+      "Address 2":='';
+
+      FOR i:=1 TO 5 DO BEGIN
+        IF Line[i]<>'' THEN BEGIN
+          IF (STRLEN(Address)+STRLEN(Line[i])<=48) THEN BEGIN
+            IF Address <> '' THEN
+              Address := Address + ', ';
+            Address := Address + Line[i];
+          END ELSE
+            Address1Full :=TRUE;
+
+          IF Address1Full AND (STRLEN("Address 2")+STRLEN(Line[i])<=48) THEN BEGIN
+            IF "Address 2" <> '' THEN
+              "Address 2" := ', ';
+            "Address 2" := "Address 2" + Line[i];
+          END ELSE
+              IF Address1Full THEN
+                EXIT;
+        END;
+      END;
+    END;
+
+    LOCAL PROCEDURE CheckUser@1040013();
+    VAR
+      UserSetup@1040000 : Record 91;
+    BEGIN
+      IF UserSetup.GET(USERID) THEN BEGIN
+        IF NOT UserSetup."Allow PCA" THEN
+          ERROR(ErrNotAllowedToUsePCA);
+      END ELSE
+        ERROR(ErrUserNotExist,USERID);
+    END;
+
+    LOCAL PROCEDURE BuildCountriesString@1040008() CountriesString : Text[250];
+    VAR
+      Countries@1040000 : Record 9;
+    BEGIN
+      Countries.SETRANGE("Include PCA Results",TRUE);
+      IF Countries.FINDSET(FALSE,FALSE) THEN BEGIN
+        REPEAT
+          IF CountriesString = '' THEN
+            CountriesString := Countries.Code
+          ELSE
+            CountriesString += ','+ Countries.Code;
+        UNTIL Countries.NEXT=0;
+      END ELSE
+        ERROR(ErrMissingCountrySetup);
+
+      EXIT(CountriesString);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

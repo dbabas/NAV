@@ -1,0 +1,425 @@
+OBJECT Codeunit 50002 Loqate Functions
+{
+  OBJECT-PROPERTIES
+  {
+    Date=05/12/18;
+    Time=09:32:24;
+    Modified=Yes;
+    Version List=OP14491;
+  }
+  PROPERTIES
+  {
+    OnRun=VAR
+            CompanyName@1000000005 : Text;
+            Address@1000000004 : Text;
+            Address2@1000000003 : Text;
+            City@1000000002 : Text;
+            County@1000000001 : Text;
+            PostCode@1000000000 : Code[20];
+          BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      HTTPUtility@1000000000 : DotNet "'System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Web.HttpUtility";
+      GLSetup@1000000001 : Record 98;
+      GLSetupRetrieved@1000000002 : Boolean;
+      CheckEnabledNotComplete@1000000003 : TextConst 'ENU=CheckEnabled function should be run first.;ENG=CheckEnabled function should be run first.';
+      Container@1000000004 : Text;
+      ErrNoResults@1000000005 : TextConst 'ENU=No results found for this Postcode.;ENG=No results found for this Postcode.';
+      CompanyInformation@1000000006 : Record 79;
+      ErrNoCountries@1000000007 : TextConst 'ENU=Setup at least one country on the Countries/Regions table to get results for this Postcode.;ENG=Setup at least one country on the Countries/Regions table to get results for this Postcode.';
+
+    PROCEDURE CaptureInteractiveFind@1000000001(pSearchText@1000000001 : Text;VAR pCompanyName@1000000023 : Text;VAR pAddress@1000000031 : Text;VAR pAddress2@1000000032 : Text;VAR pCity@1000000033 : Text;VAR pCounty@1000000034 : Text;VAR pPostCode@1000000035 : Code[20]);
+    VAR
+      URL@1000000003 : Text;
+      Origin@1000000004 : Text;
+      Countries@1000000005 : Text;
+      Limit@1000000006 : Integer;
+      Language@1000000007 : Text;
+      HttpWebRequest@1000000008 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest";
+      XMLDoc@1000000010 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      HttpWebResponse@1000000012 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebResponse";
+      MemoryStream@1000000013 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Stream";
+      StreamReader@1000000015 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
+      Encoding@1000000016 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      XMLNode@1000000017 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+      InternalServerError@1000000009 : TextConst 'ENU=Http Response Status %1, %2;ENG=Http Response Status %1, %2';
+      XMLNodeList@1000000011 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNodeList";
+      i@1000000014 : Integer;
+      NoOfColumns@1000000018 : Integer;
+      NoOfRows@1000000019 : Integer;
+      XMLAttribute@1000000021 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlAttribute";
+      XMLAttributeCollection@1000000022 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlAttributeCollection";
+      Column@1000000020 : ARRAY [5] OF Text;
+      ErrorNo@1000000024 : Text;
+      ErrorDesc@1000000025 : Text;
+      ErrorCause@1000000026 : Text;
+      ErrorResolution@1000000027 : Text;
+      PassedError@1000000028 : TextConst 'ENU=Error %1, %2. %3 %4';
+      LoqateAddressResponseTmp@1000000030 : TEMPORARY Record 50002;
+      j@1000000029 : Integer;
+      Country@1000000000 : Record 9;
+    BEGIN
+      IF NOT GLSetupRetrieved THEN
+        ERROR(CheckEnabledNotComplete);
+
+      //DOC OP14491 DB 15/11/2018 -
+      IF NOT CompanyInformation.GET THEN
+        CompanyInformation.INIT;
+
+      IF CompanyInformation."Country/Region Code"<>'' THEN
+        Origin := CompanyInformation."Country/Region Code";
+
+      Country.SETRANGE("Loqate Country",TRUE);
+      IF Country.FINDSET THEN BEGIN
+        REPEAT
+          IF Countries = '' THEN
+            Countries := Country.Code
+          ELSE
+            Countries += ','+Country.Code;
+        UNTIL Country.NEXT =0;
+      END ELSE
+        ERROR(ErrNoCountries);
+      //DOC OP14491 DB 15/11/2018 +
+
+
+
+      //XML Attribute based endpoint
+
+      //Build the URL..
+      URL := 'https://api.addressy.com/Capture/Interactive/Find/v1.00/xmla.ws';
+      URL += '?Key=' + HTTPUtility.HtmlEncode(GLSetup."Loqate Service Key");
+      URL += '&Text=' + HTTPUtility.HtmlEncode(pSearchText);
+      URL += '&Container=' + HTTPUtility.HtmlEncode(Container);
+      URL += '&Origin=' + HTTPUtility.HtmlEncode(Origin);
+      URL += '&Countries=' + HTTPUtility.HtmlEncode(Countries);
+      URL += '&Limit=' + HTTPUtility.HtmlEncode(Limit);
+      URL += '&Language=' + HTTPUtility.HtmlEncode(Language);
+
+
+      //test error
+      //URL := 'https://api.addressy.com/Capture/Interactive/Find/v1.00/xmla.ws?Key=AA11-AA11-AA11-AA11&Text=wr5 3da&Container=GB|RM|ENG|3DA-WR5&Origin=52.182,-2.222&Countries=GB,US,CA&Limit=10&Language=';
+
+      IF ISNULL(XMLDoc) THEN
+        XMLDoc := XMLDoc.XmlDocument;
+
+      //Make the Request
+      HttpWebRequest := HttpWebRequest.Create(URL);
+      HttpWebRequest.UseDefaultCredentials(TRUE);
+      HttpWebRequest.Method('GET');
+      HttpWebRequest.AllowAutoRedirect(TRUE);
+      HttpWebRequest.ContentType('text/xml; charset=utf-8');
+      HttpWebRequest.KeepAlive(TRUE);
+      HttpWebRequest.ContentLength := 0;
+
+      HttpWebResponse := HttpWebRequest.GetResponse;
+      MemoryStream := HttpWebResponse.GetResponseStream;
+      StreamReader := StreamReader.StreamReader(MemoryStream,Encoding.UTF8);
+      XMLDoc.LoadXml(StreamReader.ReadToEnd);
+      MemoryStream.Close;
+
+      //check Response
+      //XMLDoc.Save('C:\Temp\DebTest.XML');
+      CLEAR(NoOfColumns);
+      CLEAR(NoOfRows);
+      CASE FORMAT(HttpWebResponse.StatusCode) OF
+        'OK' :
+          BEGIN
+            XMLNodeList := XMLDoc.SelectNodes('//Table/*');
+            FOR i := 0 TO XMLNodeList.Count - 1 DO BEGIN
+              XMLNode := XMLNodeList.Item(i);
+              CASE XMLNode.Name OF
+                'Columns' :
+                  BEGIN
+                    XMLAttributeCollection := XMLNode.Attributes;
+                    XMLNode := XMLAttributeCollection.GetNamedItem('Items');
+                    IF EVALUATE(NoOfColumns,XMLNode.InnerText) THEN;
+                  END;
+                'Rows' :
+                  BEGIN
+                    XMLAttributeCollection := XMLNode.Attributes;
+                    XMLNode := XMLAttributeCollection.GetNamedItem('Items');
+                    IF EVALUATE(NoOfRows,XMLNode.InnerText) THEN;
+                  END;
+              END;
+            END;
+
+            //Check for an error...
+            IF NoOfColumns = 4 THEN BEGIN
+              XMLNode := XMLDoc.SelectSingleNode('//Table/Columns/Column');
+              XMLAttributeCollection := XMLNode.Attributes;
+              XMLNode := XMLAttributeCollection.GetNamedItem('Name');
+              IF XMLNode.InnerText = 'Error' THEN BEGIN
+                XMLNode := XMLDoc.SelectSingleNode('//Table/Rows/Row');
+                XMLAttributeCollection := XMLNode.Attributes;
+                FOR i := 0 TO XMLAttributeCollection.Count -1 DO BEGIN
+                  XMLNode := XMLAttributeCollection.Item(i);
+                  CASE XMLNode.Name OF
+                    'Resolution' : ErrorResolution := XMLNode.InnerText;
+                    'Cause' : ErrorCause := XMLNode.InnerText;
+                    'Description' : ErrorDesc := XMLNode.InnerText;
+                    'Error' : ErrorNo := XMLNode.InnerText;
+                  END;
+                END;
+              END;
+              ERROR(PassedError,ErrorNo,ErrorDesc,ErrorCause,ErrorResolution);
+            END ELSE BEGIN
+              //handle returned details
+              XMLNodeList := XMLDoc.SelectNodes('//Table/Rows/*');
+              FOR i := 0 TO XMLNodeList.Count - 1 DO BEGIN
+                XMLNode := XMLNodeList.Item(i);  //Row
+                LoqateAddressResponseTmp.INIT;
+                XMLAttributeCollection := XMLNode.Attributes;
+                FOR j := 0 TO XMLAttributeCollection.Count - 1 DO BEGIN
+                  XMLNode := XMLAttributeCollection.Item(j);
+                  CASE XMLNode.Name OF
+                    LoqateAddressResponseTmp.FIELDNAME(Id) : LoqateAddressResponseTmp.Id := XMLNode.InnerText;
+                    LoqateAddressResponseTmp.FIELDNAME(Type) : LoqateAddressResponseTmp.Type := XMLNode.InnerText;
+                    LoqateAddressResponseTmp.FIELDNAME(Text) : LoqateAddressResponseTmp.Text := XMLNode.InnerText;
+                    LoqateAddressResponseTmp.FIELDNAME(Highlight) : LoqateAddressResponseTmp.Highlight := XMLNode.InnerText;
+                    LoqateAddressResponseTmp.FIELDNAME(Description) : LoqateAddressResponseTmp.Description := XMLNode.InnerText;
+                  END;
+                END;
+                LoqateAddressResponseTmp."Sort No." := i;
+                LoqateAddressResponseTmp.INSERT;
+              END;
+              //DOC OP14491 DB 22/11/2018 -
+              {IF PAGE.RUNMODAL(0,LoqateAddressResponseTmp) = ACTION::LookupOK THEN BEGIN
+                IF LoqateAddressResponseTmp.Type = 'Address' THEN BEGIN
+                  CaptureInteractiveRetreive(GLSetup."Loqate Service Key",LoqateAddressResponseTmp.Id,pCompanyName,pAddress,pAddress2,pCity,pCounty,pPostCode)
+                END ELSE BEGIN
+                  Container := LoqateAddressResponseTmp.Id;
+                  CaptureInteractiveFind(pSearchText,pCompanyName,pAddress,pAddress2,pCity,pCounty,pPostCode);
+                END;
+              END;}
+              IF LoqateAddressResponseTmp.ISEMPTY THEN
+                ERROR(ErrNoResults);
+              LoqateAddressResponseTmp.SETFILTER(Type,'<>%1','Address');
+              IF NOT LoqateAddressResponseTmp.ISEMPTY THEN BEGIN
+                IF LoqateAddressResponseTmp.COUNT>1 THEN BEGIN
+                  LoqateAddressResponseTmp.RESET;
+                  IF PAGE.RUNMODAL(0,LoqateAddressResponseTmp) = ACTION::LookupOK THEN BEGIN
+                    IF LoqateAddressResponseTmp.Type = 'Address' THEN BEGIN
+                      CaptureInteractiveRetreive(GLSetup."Loqate Service Key",LoqateAddressResponseTmp.Id,pCompanyName,pAddress,pAddress2,pCity,pCounty,pPostCode)
+                    END ELSE BEGIN
+                      Container := LoqateAddressResponseTmp.Id;
+                      CaptureInteractiveFind(pSearchText,pCompanyName,pAddress,pAddress2,pCity,pCounty,pPostCode);
+                    END;
+                  END;
+                END;
+                IF LoqateAddressResponseTmp.COUNT=1 THEN BEGIN
+                  LoqateAddressResponseTmp.RESET;
+                  IF LoqateAddressResponseTmp.COUNT>1 THEN BEGIN
+                    IF PAGE.RUNMODAL(0,LoqateAddressResponseTmp) = ACTION::LookupOK THEN BEGIN
+                      IF LoqateAddressResponseTmp.Type = 'Address' THEN BEGIN
+                        CaptureInteractiveRetreive(GLSetup."Loqate Service Key",LoqateAddressResponseTmp.Id,pCompanyName,pAddress,pAddress2,pCity,pCounty,pPostCode)
+                      END ELSE BEGIN
+                        Container := LoqateAddressResponseTmp.Id;
+                        CaptureInteractiveFind(pSearchText,pCompanyName,pAddress,pAddress2,pCity,pCounty,pPostCode);
+                      END;
+                    END;
+                  END;
+                  IF LoqateAddressResponseTmp.COUNT=1 THEN BEGIN
+                    LoqateAddressResponseTmp.FINDFIRST;
+                    Container := LoqateAddressResponseTmp.Id;
+                    CaptureInteractiveFind(pSearchText,pCompanyName,pAddress,pAddress2,pCity,pCounty,pPostCode);
+                  END;
+                END;
+              END ELSE BEGIN
+                LoqateAddressResponseTmp.RESET;
+                IF PAGE.RUNMODAL(0,LoqateAddressResponseTmp) = ACTION::LookupOK THEN
+                  CaptureInteractiveRetreive(GLSetup."Loqate Service Key",LoqateAddressResponseTmp.Id,pCompanyName,pAddress,pAddress2,pCity,pCounty,pPostCode);
+              END;
+              //DOC OP14491 DB 22/11/2018 +
+            END;
+          END;
+        ELSE
+          ERROR(InternalServerError,FORMAT(HttpWebResponse.StatusCode),HttpWebResponse.StatusDescription);
+      END;
+
+      CLEAR(XMLDoc);
+      CLEAR(HttpWebRequest);
+      CLEAR(HttpWebResponse);
+      CLEAR(MemoryStream);
+      CLEAR(StreamReader);
+      CLEAR(XMLNode);
+      CLEAR(XMLNodeList);
+      CLEAR(XMLAttributeCollection);
+    END;
+
+    PROCEDURE CaptureInteractiveRetreive@1000000007(pKey@1000000000 : Text;pId@1000000001 : Text;VAR CompanyName@1000000028 : Text;VAR Address@1000000027 : Text;VAR Address2@1000000026 : Text;VAR City@1000000025 : Text;VAR County@1000000024 : Text;VAR PostCode@1000000023 : Code[20]);
+    VAR
+      i@1000000002 : Integer;
+      URL@1000000003 : Text;
+      XMLDoc@1000000004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      HttpWebRequest@1000000005 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest";
+      HttpWebResponse@1000000006 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebResponse";
+      MemoryStream@1000000009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Stream";
+      StreamReader@1000000008 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
+      Encoding@1000000007 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      XMLNode@1000000016 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+      XMLNodeList@1000000015 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNodeList";
+      NoOfColumns@1000000013 : Integer;
+      NoOfRows@1000000012 : Integer;
+      XMLAttribute@1000000011 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlAttribute";
+      XMLAttributeCollection@1000000010 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlAttributeCollection";
+      ErrorNo@1000000019 : Text;
+      ErrorDesc@1000000018 : Text;
+      ErrorCause@1000000017 : Text;
+      ErrorResolution@1000000014 : Text;
+      InternalServerError@1000000021 : TextConst 'ENU=Http Response Status %1, %2;ENG=Http Response Status %1, %2';
+      PassedError@1000000020 : TextConst 'ENU=Error %1, %2. %3 %4';
+      j@1000000022 : Integer;
+      AddressLine@1000000029 : ARRAY [3] OF Text;
+    BEGIN
+      //Build the URL..
+      URL := 'https://api.addressy.com/Capture/Interactive/Retrieve/v1.00/xmla.ws';
+      URL += '?Key=' + HTTPUtility.HtmlEncode(pKey);
+      URL += '&Id=' + HTTPUtility.HtmlEncode(pId);
+      FOR i := 1 TO 20 DO BEGIN
+        URL += '&Field'+FORMAT(i)+'Format=' + HTTPUtility.HtmlEncode('');
+      END;
+
+      IF ISNULL(XMLDoc) THEN
+        XMLDoc := XMLDoc.XmlDocument;
+
+      //Make the Request
+      HttpWebRequest := HttpWebRequest.Create(URL);
+      HttpWebRequest.UseDefaultCredentials(TRUE);
+      HttpWebRequest.Method('GET');
+      HttpWebRequest.AllowAutoRedirect(TRUE);
+      HttpWebRequest.ContentType('text/xml; charset=utf-8');
+      HttpWebRequest.KeepAlive(TRUE);
+      HttpWebRequest.ContentLength := 0;
+
+      HttpWebResponse := HttpWebRequest.GetResponse;
+      MemoryStream := HttpWebResponse.GetResponseStream;
+      StreamReader := StreamReader.StreamReader(MemoryStream,Encoding.UTF8);
+      XMLDoc.LoadXml(StreamReader.ReadToEnd);
+      MemoryStream.Close;
+
+      //check Response
+      //XMLDoc.Save('C:\Temp\DebTest2.XML');
+      CLEAR(NoOfColumns);
+      CLEAR(NoOfRows);
+      CASE FORMAT(HttpWebResponse.StatusCode) OF
+        'OK' :
+          BEGIN
+            XMLNodeList := XMLDoc.SelectNodes('//Table/*');
+            FOR i := 0 TO XMLNodeList.Count - 1 DO BEGIN
+              XMLNode := XMLNodeList.Item(i);
+              CASE XMLNode.Name OF
+                'Columns' :
+                  BEGIN
+                    XMLAttributeCollection := XMLNode.Attributes;
+                    XMLNode := XMLAttributeCollection.GetNamedItem('Items');
+                    IF EVALUATE(NoOfColumns,XMLNode.InnerText) THEN;
+                  END;
+                'Rows' :
+                  BEGIN
+                    XMLAttributeCollection := XMLNode.Attributes;
+                    XMLNode := XMLAttributeCollection.GetNamedItem('Items');
+                    IF EVALUATE(NoOfRows,XMLNode.InnerText) THEN;
+                  END;
+              END;
+            END;
+
+            //Check for an error...
+            IF NoOfColumns = 4 THEN BEGIN
+              XMLNode := XMLDoc.SelectSingleNode('//Table/Columns/Column');
+              XMLAttributeCollection := XMLNode.Attributes;
+              XMLNode := XMLAttributeCollection.GetNamedItem('Name');
+              IF XMLNode.InnerText = 'Error' THEN BEGIN
+                XMLNode := XMLDoc.SelectSingleNode('//Table/Rows/Row');
+                XMLAttributeCollection := XMLNode.Attributes;
+                FOR i := 0 TO XMLAttributeCollection.Count -1 DO BEGIN
+                  XMLNode := XMLAttributeCollection.Item(i);
+                  CASE XMLNode.Name OF
+                    'Resolution' : ErrorResolution := XMLNode.InnerText;
+                    'Cause' : ErrorCause := XMLNode.InnerText;
+                    'Description' : ErrorDesc := XMLNode.InnerText;
+                    'Error' : ErrorNo := XMLNode.InnerText;
+                  END;
+                END;
+              END;
+              ERROR(PassedError,ErrorNo,ErrorDesc,ErrorCause,ErrorResolution);
+            END ELSE BEGIN
+              //handle returned details
+              XMLNodeList := XMLDoc.SelectNodes('//Table/Rows/*');
+              FOR i := 0 TO XMLNodeList.Count - 1 DO BEGIN
+                XMLNode := XMLNodeList.Item(i);  //Row
+                XMLAttributeCollection := XMLNode.Attributes;
+                FOR j := 0 TO XMLAttributeCollection.Count - 1 DO BEGIN
+                  XMLNode := XMLAttributeCollection.Item(j);
+                  CASE XMLNode.Name OF
+                    'Company' :
+                      BEGIN
+                        IF XMLNode.InnerText <> '' THEN
+                          CompanyName := XMLNode.InnerText;
+                      END;
+                    //DOC OP14491 DB 05/12/2018 -
+                    {'Line1' : Address := XMLNode.InnerText;
+                    //DOC OP14491 DB 23/11/2018 -
+                    //'Line2' : Address2 := XMLNode.InnerText;
+                    'Line2' : Address := COPYSTR(Address+' '+XMLNode.InnerText,1,50);
+                    'Line3' : Address2 := COPYSTR(XMLNode.InnerText,1,50);
+                    //DOC OP14491 DB 23/11/2018 +
+                    }
+                    'Line1' : AddressLine[1] := XMLNode.InnerText;
+                    'Line2' : AddressLine[2] := XMLNode.InnerText;
+                    'Line3' : AddressLine[3] := XMLNode.InnerText;
+                    //DOC OP14491 DB 05/12/2018 +
+                    'City' : City := XMLNode.InnerText;
+                    'Province' : County := XMLNode.InnerText;
+                    'PostalCode' : PostCode := XMLNode.InnerText;
+                  END;
+                END;
+                //DOC OP14491 DB 05/12/2018 -
+                IF AddressLine[3]<>'' THEN BEGIN
+                  IF AddressLine[2]<>'' THEN
+                    Address := COPYSTR(AddressLine[1]+', '+AddressLine[2],1,50)
+                  ELSE
+                    Address := COPYSTR(AddressLine[1],1,50);;
+                  Address2 := COPYSTR(AddressLine[3],1,50);
+                END ELSE BEGIN
+                  Address := COPYSTR(AddressLine[1],1,50);
+                  Address2 := COPYSTR(AddressLine[2],1,50);
+                END;
+                //DOC OP14491 DB 05/12/2018 +
+              END;
+            END;
+          END;
+        ELSE
+          ERROR(InternalServerError,FORMAT(HttpWebResponse.StatusCode),HttpWebResponse.StatusDescription);
+      END;
+      CLEAR(XMLDoc);
+      CLEAR(HttpWebRequest);
+      CLEAR(HttpWebResponse);
+      CLEAR(MemoryStream);
+      CLEAR(StreamReader);
+      CLEAR(XMLNode);
+      CLEAR(XMLNodeList);
+      CLEAR(XMLAttributeCollection);
+    END;
+
+    PROCEDURE CheckEnabled@1000000002() : Boolean;
+    BEGIN
+      GLSetup.GET;
+      GLSetupRetrieved := TRUE;
+      EXIT(GLSetup."Loqate Enabled");
+    END;
+
+    BEGIN
+    {
+      //DOC OP14491 DRM 15/11/2018 - Created for Loqate Address verification integration.
+      //DOC OP14491 DB 15/11/2018 - Changes to the logic to skip intermediate step when only one container.
+      //DOC OP14491 DB 23/11/2018 - Changes to include "Line 3" of the results
+      //DOC OP14491 DB 05/12/2018 - Changes to return Address and Address 2 in a different logic.
+    }
+    END.
+  }
+}
+

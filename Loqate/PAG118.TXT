@@ -1,0 +1,331 @@
+OBJECT Page 118 General Ledger Setup
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22/11/18;
+    Time=10:06:11;
+    Modified=Yes;
+    Version List=NAVW17.10,NAVGB7.10,QAS,SDL2.000,OP14491;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=General Ledger Setup;
+               ENG=General Ledger Setup];
+    InsertAllowed=No;
+    DeleteAllowed=No;
+    SourceTable=Table98;
+    PageType=Card;
+    OnInit=BEGIN
+             ThresholdAmountEnable := TRUE;
+           END;
+
+    OnOpenPage=BEGIN
+                 RESET;
+                 IF NOT GET THEN BEGIN
+                   INIT;
+                   INSERT;
+                 END;
+
+                 IF "Threshold applies" THEN
+                   ThresholdAmountEnable := TRUE
+                 ELSE
+                   ThresholdAmountEnable := FALSE;
+               END;
+
+    ActionList=ACTIONS
+    {
+      { 1900000004;0 ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 42      ;1   ;ActionGroup;
+                      CaptionML=[ENU=F&unctions;
+                                 ENG=F&unctions];
+                      Image=Action }
+      { 44      ;2   ;Action    ;
+                      Ellipsis=Yes;
+                      CaptionML=[ENU=Change Global Dimensions;
+                                 ENG=Change Global Dimensions];
+                      Image=ChangeDimensions;
+                      OnAction=BEGIN
+                                 REPORT.RUNMODAL(REPORT::"Change Global Dimensions");
+                               END;
+                                }
+      { 2       ;2   ;Action    ;
+                      CaptionML=[ENU=Change Payment &Tolerance;
+                                 ENG=Change Payment &Tolerance];
+                      Image=ChangePaymentTolerance;
+                      OnAction=VAR
+                                 ChangePmtTol@1001 : Report 34;
+                                 Currency@1002 : Record 4;
+                               BEGIN
+                                 Currency.INIT;
+                                 ChangePmtTol.SetCurrency(Currency);
+                                 ChangePmtTol.RUNMODAL;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1900000001;0;Container;
+                ContainerType=ContentArea }
+
+    { 1   ;1   ;Group     ;
+                CaptionML=[ENU=General;
+                           ENG=General] }
+
+    { 6   ;2   ;Field     ;
+                SourceExpr="Allow Posting From" }
+
+    { 8   ;2   ;Field     ;
+                SourceExpr="Allow Posting To" }
+
+    { 43  ;2   ;Field     ;
+                SourceExpr="Register Time" }
+
+    { 67  ;2   ;Field     ;
+                SourceExpr="Local Address Format" }
+
+    { 73  ;2   ;Field     ;
+                SourceExpr="Local Cont. Addr. Format" }
+
+    { 77  ;2   ;Field     ;
+                SourceExpr="Inv. Rounding Precision (LCY)" }
+
+    { 75  ;2   ;Field     ;
+                SourceExpr="Inv. Rounding Type (LCY)" }
+
+    { 55  ;2   ;Field     ;
+                SourceExpr="Allow G/L Acc. Deletion Before" }
+
+    { 60  ;2   ;Field     ;
+                SourceExpr="Check G/L Account Usage" }
+
+    { 14  ;2   ;Field     ;
+                SourceExpr="EMU Currency" }
+
+    { 18  ;2   ;Field     ;
+                SourceExpr="LCY Code" }
+
+    { 49  ;2   ;Field     ;
+                SourceExpr="Pmt. Disc. Excl. VAT" }
+
+    { 47  ;2   ;Field     ;
+                SourceExpr="Adjust for Payment Disc." }
+
+    { 21  ;2   ;Field     ;
+                SourceExpr="Unrealized VAT" }
+
+    { 86  ;2   ;Field     ;
+                SourceExpr="Prepayment Unrealized VAT" }
+
+    { 5   ;2   ;Field     ;
+                SourceExpr="Max. VAT Difference Allowed" }
+
+    { 3   ;2   ;Field     ;
+                SourceExpr="VAT Rounding Type" }
+
+    { 1040000;2;Field     ;
+                SourceExpr="VAT Tolerance %" }
+
+    { 82  ;2   ;Field     ;
+                SourceExpr="Bill-to/Sell-to VAT Calc." }
+
+    { 84  ;2   ;Field     ;
+                SourceExpr="Print VAT specification in LCY" }
+
+    { 4   ;2   ;Field     ;
+                SourceExpr="Use Legacy G/L Entry Locking" }
+
+    { 1904569201;1;Group  ;
+                CaptionML=[ENU=Numbering;
+                           ENG=Numbering] }
+
+    { 10  ;2   ;Field     ;
+                SourceExpr="Bank Account Nos." }
+
+    { 1900309501;1;Group  ;
+                CaptionML=[ENU=Dimensions;
+                           ENG=Dimensions] }
+
+    { 40  ;2   ;Field     ;
+                SourceExpr="Global Dimension 1 Code" }
+
+    { 38  ;2   ;Field     ;
+                SourceExpr="Global Dimension 2 Code" }
+
+    { 36  ;2   ;Field     ;
+                SourceExpr="Shortcut Dimension 1 Code" }
+
+    { 34  ;2   ;Field     ;
+                SourceExpr="Shortcut Dimension 2 Code" }
+
+    { 32  ;2   ;Field     ;
+                SourceExpr="Shortcut Dimension 3 Code" }
+
+    { 30  ;2   ;Field     ;
+                SourceExpr="Shortcut Dimension 4 Code" }
+
+    { 28  ;2   ;Field     ;
+                SourceExpr="Shortcut Dimension 5 Code" }
+
+    { 26  ;2   ;Field     ;
+                SourceExpr="Shortcut Dimension 6 Code" }
+
+    { 23  ;2   ;Field     ;
+                SourceExpr="Shortcut Dimension 7 Code" }
+
+    { 22  ;2   ;Field     ;
+                SourceExpr="Shortcut Dimension 8 Code" }
+
+    { 1904488501;1;Group  ;
+                CaptionML=[ENU=Reporting;
+                           ENG=Reporting] }
+
+    { 12  ;2   ;Field     ;
+                SourceExpr="Additional Reporting Currency";
+                OnValidate=VAR
+                             Confirmed@1001 : Boolean;
+                           BEGIN
+                             IF "Additional Reporting Currency" <> xRec."Additional Reporting Currency" THEN BEGIN
+                               IF "Additional Reporting Currency" = '' THEN
+                                 Confirmed := CONFIRM(Text002,FALSE)
+                               ELSE
+                                 Confirmed := CONFIRM(Text003,FALSE);
+                               IF NOT Confirmed THEN
+                                 ERROR('');
+                             END;
+                           END;
+                            }
+
+    { 16  ;2   ;Field     ;
+                SourceExpr="VAT Exchange Rate Adjustment" }
+
+    { 1904409301;1;Group  ;
+                CaptionML=[ENU=Application;
+                           ENG=Application] }
+
+    { 65  ;2   ;Field     ;
+                SourceExpr="Appln. Rounding Precision" }
+
+    { 72  ;2   ;Field     ;
+                SourceExpr="Pmt. Disc. Tolerance Warning" }
+
+    { 51  ;2   ;Field     ;
+                SourceExpr="Pmt. Disc. Tolerance Posting" }
+
+    { 62  ;2   ;Field     ;
+                SourceExpr="Payment Discount Grace Period";
+                OnValidate=VAR
+                             PaymentToleranceMgt@1000 : Codeunit 426;
+                           BEGIN
+                             IF CONFIRM(Text001,TRUE) THEN
+                               PaymentToleranceMgt.CalcGracePeriodCVLedgEntry("Payment Discount Grace Period");
+                           END;
+                            }
+
+    { 80  ;2   ;Field     ;
+                SourceExpr="Payment Tolerance Warning" }
+
+    { 70  ;2   ;Field     ;
+                SourceExpr="Payment Tolerance Posting" }
+
+    { 63  ;2   ;Field     ;
+                SourceExpr="Payment Tolerance %" }
+
+    { 64  ;2   ;Field     ;
+                SourceExpr="Max. Payment Tolerance Amount" }
+
+    { 1904993701;1;Group  ;
+                CaptionML=[ENU=Reverse Charge;
+                           ENG=Reverse Charge] }
+
+    { 10410090;2;Field    ;
+                SourceExpr="Threshold applies";
+                OnValidate=BEGIN
+                             IF "Threshold applies" THEN
+                               ThresholdAmountEnable := TRUE
+                             ELSE
+                               ThresholdAmountEnable := FALSE;
+                           END;
+                            }
+
+    { 10410092;2;Field    ;
+                Name=ThresholdAmount;
+                CaptionML=[ENU=Threshold Amount;
+                           ENG=Threshold Amount];
+                SourceExpr="Threshold Amount";
+                Enabled=ThresholdAmountEnable }
+
+    { 7   ;1   ;Group     ;
+                CaptionML=[ENU=Payroll Transaction Import;
+                           ENG=Payroll Transaction Import];
+                Visible=FALSE;
+                GroupType=Group }
+
+    { 9   ;2   ;Field     ;
+                SourceExpr="Payroll Trans. Import Format";
+                Visible=FALSE }
+
+    { 1901234601;1;Group  ;
+                CaptionML=[ENU=Address Verification;
+                           ENG=Address Verification];
+                GroupType=Group }
+
+    { 1000000000;2;Group  ;
+                CaptionML=ENU=QAS;
+                GroupType=Group }
+
+    { 1040004;3;Field     ;
+                SourceExpr="QAS Enabled";
+                Enabled="Loqate Enabled"=FALSE }
+
+    { 1040002;3;Field     ;
+                SourceExpr="Web Service URL" }
+
+    { 1040006;3;Field     ;
+                SourceExpr="Suggest Names" }
+
+    { 1000000001;2;Group  ;
+                CaptionML=[ENU=Loqate;
+                           ENG=Loqate];
+                GroupType=Group }
+
+    { 1000000002;3;Field  ;
+                SourceExpr="Loqate Enabled";
+                Enabled="QAS Enabled"=FALSE }
+
+    { 1000000003;3;Field  ;
+                SourceExpr="Loqate Service Key" }
+
+    { 1900000007;0;Container;
+                ContainerType=FactBoxArea }
+
+    { 1900383207;1;Part   ;
+                Visible=FALSE;
+                PartType=System;
+                SystemPartID=RecordLinks }
+
+    { 1905767507;1;Part   ;
+                Visible=FALSE;
+                PartType=System;
+                SystemPartID=Notes }
+
+  }
+  CODE
+  {
+    VAR
+      Text001@1000 : TextConst 'ENU=Do you want to change all open entries for every customer and vendor that are not blocked;ENG=Do you want to change all open entries for every customer and vendor that are not blocked';
+      ThresholdAmountEnable@19035618 : Boolean INDATASET;
+      Text002@1002 : TextConst 'ENU=If you delete the additional reporting currency, future general ledger entries are posted in LCY only. Deleting the additional reporting currency does not affect already posted general ledger entries.\\Are you sure that you want to delete the additional reporting currency?;ENG=If you delete the additional reporting currency, future general ledger entries are posted in LCY only. Deleting the additional reporting currency does not affect already posted general ledger entries.\\Are you sure that you want to delete the additional reporting currency?';
+      Text003@1001 : TextConst 'ENU=If you change the additional reporting currency, future general ledger entries are posted in the new reporting currency and in LCY. To enable the additional reporting currency, a batch job opens, and running the batch job recalculates already posted general ledger entries in the new additional reporting currency.\Entries will be deleted in the Analysis View if it is unblocked, and an update will be necessary.\\Are you sure that you want to change the additional reporting currency?;ENG=If you change the additional reporting currency, future general ledger entries are posted in the new reporting currency and in LCY. To enable the additional reporting currency, a batch job opens, and running the batch job recalculates already posted general ledger entries in the new additional reporting currency.\Entries will be deleted in the Analysis View if it is unblocked, and an update will be necessary.\\Are you sure that you want to change the additional reporting currency?';
+
+    BEGIN
+    {
+      SDL1.000  A.Ireland QUK  QAS integration  20/03/2009
+        Added new QAS tab and parameter fields for QAS integration.
+      //DOC OP14491 DRM 15/11/2018 - Added field Loqate Enabled and created new group for Address Verification to include this and exsisting QAS fields.
+    }
+    END.
+  }
+}
+

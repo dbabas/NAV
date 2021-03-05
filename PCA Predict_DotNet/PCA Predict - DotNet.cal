@@ -1,0 +1,327 @@
+OBJECT Codeunit 50005 Postcode WS Management
+{
+  OBJECT-PROPERTIES
+  {
+    Date=24/01/18;
+    Time=13:52:53;
+    Modified=Yes;
+    Version List=OP10248,IN49053,IN50316;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      SalesSetup@1000000000 : Record 311;
+
+    PROCEDURE GetAddress@1000000000(PostCode@1000000000 : Code[20];VAR Address@1000000001 : Text[50];VAR "Address 2"@1000000002 : Text[50];VAR County@1000000003 : Text[30];VAR City@1000000004 : Text[30];VAR Country@1000000019 : Code[10];VAR ReturnPostCode@1000000020 : Code[20];VAR CompName@1000000021 : Text[50]);
+    VAR
+      HttpUtility@1000000015 : DotNet "'System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Web.HttpUtility";
+      xmldoc@1000000014 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.DOMDocument";
+      XMLDocNodeList@1000000013 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMNodeList";
+      XMLDocNodeList2@1000000012 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMNodeList";
+      XMLDocNode@1000000011 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMNode";
+      XMLDocNode2@1000000010 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMNode";
+      AttributeList@1000000017 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMNamedNodeMap";
+      Attribute@1000000016 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMNode";
+      TempCust@1000000009 : TEMPORARY Record 18;
+      URLString@1000000008 : Text;
+      i@1000000007 : Integer;
+      j@1000000006 : Integer;
+      RecCounter@1000000005 : Integer;
+      Container@1000000018 : Text;
+    BEGIN
+      IF NOT GUIALLOWED THEN
+        EXIT;
+
+      SalesSetup.GET;
+
+      URLString := 'http://services.postcodeanywhere.co.uk/Capture/Interactive/Find/v1.00/dataset.ws?';
+      URLString += '&Key=' + HttpUtility.UrlEncode(SalesSetup."PCA Predict Key");
+      URLString += '&Text=' + HttpUtility.UrlEncode(PostCode);
+      //DOC OP10248 JF 03/08/2017 -
+      //URLString += '&Countries=' + HttpUtility.UrlEncode('GB,IR,IM,JE,GG');
+      URLString += '&Countries=' + HttpUtility.UrlEncode('GB,IR,IM,JE,GG,GY');
+      //DOC OP10248 JF 03/08/2017 +
+
+      URLString += '&Language=' + HttpUtility.UrlEncode('en');
+
+      IF NOT WSCall_Rest(URLString,xmldoc) THEN
+        ERROR('PostcodeAnywhere Web service call failed');
+      XMLDocNodeList := xmldoc.getElementsByTagName('NewDataSet/Data');
+      XMLDocNode := XMLDocNodeList.item(0);
+      XMLDocNodeList2 := XMLDocNode.childNodes;
+      FOR i :=0 TO XMLDocNodeList2.length-1 DO BEGIN
+        XMLDocNode2 := XMLDocNodeList2.item(i);
+        IF XMLDocNode2.nodeName = 'Id' THEN
+          Container := XMLDocNode2.text;
+        IF (XMLDocNode2.nodeName = 'Type') AND (XMLDocNode2.text<>'Address') THEN
+          URLString += '&Container=' + HttpUtility.UrlEncode(Container);
+      END;
+      //message(URLString);
+      CLEAR(xmldoc);
+      CLEAR(XMLDocNodeList);
+      CLEAR(XMLDocNode);
+      CLEAR(AttributeList);
+      CLEAR(Attribute);
+      IF NOT WSCall_Rest(URLString,xmldoc) THEN
+        ERROR('PostcodeAnywhere Web service call failed');
+      XMLDocNodeList := xmldoc.getElementsByTagName('NewDataSet/Data');
+
+      RecCounter :=1;
+      FOR i:=0 TO XMLDocNodeList.length-1 DO BEGIN
+        XMLDocNode := XMLDocNodeList.item(i);
+        XMLDocNodeList2 := XMLDocNode.childNodes;
+        FOR j:=0 TO XMLDocNodeList2.length-1 DO BEGIN
+          XMLDocNode2 := XMLDocNodeList2.item(j);
+          TempCust."No." := FORMAT(RecCounter);
+          RecCounter +=1;
+          CASE XMLDocNode2.nodeName OF
+            'Id': TempCust."Search Name" := COPYSTR(XMLDocNode2.text,1,30);
+            'Text': TempCust.Address := COPYSTR(XMLDocNode2.text,1,50);
+            'Description': TempCust.Name := COPYSTR(XMLDocNode2.text,1,50);
+          END;
+        END;
+        TempCust.INSERT;
+      END;
+
+      IF PAGE.RUNMODAL(50005 ,TempCust)=ACTION::LookupOK THEN
+        GetAddressDetails(TempCust."Search Name",ReturnPostCode,Address,"Address 2",County,City,Country,CompName);
+    END;
+
+    PROCEDURE GetAddressDetails@1000000003(ID@1000000000 : Text[30];VAR PostCode@1000000016 : Code[10];VAR Address@1000000004 : Text[50];VAR "Address 2"@1000000003 : Text[50];VAR County@1000000002 : Text[30];VAR City@1000000001 : Text[30];VAR Country@1000000017 : Code[10];VAR CompName@1000000018 : Text[50]);
+    VAR
+      HttpUtility@1000000015 : DotNet "'System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Web.HttpUtility";
+      xmldoc@1000000014 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.DOMDocument";
+      XMLDocNodeList@1000000013 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMNodeList";
+      XMLDocNodeList2@1000000012 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMNodeList";
+      XMLDocNode@1000000011 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMNode";
+      XMLDocNode2@1000000010 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMNode";
+      TempCust@1000000009 : TEMPORARY Record 18;
+      URLString@1000000008 : Text;
+      i@1000000007 : Integer;
+      j@1000000006 : Integer;
+      RecCounter@1000000005 : Integer;
+      Lang@1000000019 : Code[10];
+      Line@1000000020 : ARRAY [5] OF Text[50];
+    BEGIN
+      URLString := 'http://services.postcodeanywhere.co.uk/Capture/Interactive/Retrieve/v1.00/dataset.ws?';
+
+      URLString += '&Key=' + HttpUtility.UrlEncode(SalesSetup."PCA Predict Key");
+      URLString += '&Id=' + HttpUtility.UrlEncode(ID);
+
+      WSCall_Rest(URLString,xmldoc);
+      XMLDocNodeList := xmldoc.getElementsByTagName('NewDataSet/Data');
+      //xmldoc.save('c:\Temp\temp.txt');
+      FOR i:=0 TO XMLDocNodeList.length-1 DO BEGIN
+        XMLDocNode := XMLDocNodeList.item(i);
+        XMLDocNodeList2 := XMLDocNode.childNodes;
+        IF Lang<>'ENG' THEN
+          FOR j:=0 TO XMLDocNodeList2.length-1 DO BEGIN
+            XMLDocNode2 := XMLDocNodeList2.item(j);
+            CASE XMLDocNode2.nodeName OF
+              'PostalCode': PostCode := COPYSTR(XMLDocNode2.text,1,20);
+
+              //DOC IN49053 NC 15/01/2018 - Added code to read from the adress from more than just 2 lines.
+              //'Line1': Address := COPYSTR(XMLDocNode2.text,1,50);
+              //'Line2': "Address 2" := COPYSTR(XMLDocNode2.text,1,50);
+              'Line1': Line[1] := COPYSTR(XMLDocNode2.text,1,50);
+              'Line2': Line[2] := COPYSTR(XMLDocNode2.text,1,50);
+              'Line3': Line[3] := COPYSTR(XMLDocNode2.text,1,50);
+              'Line4': Line[4] := COPYSTR(XMLDocNode2.text,1,50);
+              'Line5': Line[5] := COPYSTR(XMLDocNode2.text,1,50);
+              //DOC IN49053 NC 15/01/2018 +
+
+              'City': City := COPYSTR(XMLDocNode2.text,1,30);
+              'Province': County := COPYSTR(XMLDocNode2.text,1,30);
+              'CountryIso2': BEGIN
+                                Country := XMLDocNode2.text;
+                                IF Country='GB' THEN
+                                  Country := 'UK';
+                             END;
+              'Company' : CompName := COPYSTR(XMLDocNode2.text,1,50);
+              'Language': Lang := XMLDocNode2.text;
+            END;
+          END;
+          UpdateCustAddress(Line,Address,"Address 2"); //DOC IN49053 NC 15/01/2018 -+
+      END;
+    END;
+
+    PROCEDURE WSCall_Rest@1000000007(URL@1000000007 : Text;VAR xmldoc@1000000012 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.DOMDocument") result : Boolean;
+    VAR
+      TxtError@1000000010 : TextConst 'ENU=Web service error: %1 - %2. URL: %3, method: %4, parameters: %5;ENG=Web service error: %1 - %2. URL: %3, method: %4, parameters: %5';
+      xmlhttp@1000000017 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.XMLHTTPRequest";
+      soapEnvelope@1000000016 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMElement";
+      soapBody@1000000015 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMElement";
+      soapMethod@1000000014 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMElement";
+      node@1000000013 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMNode";
+      node2@1000000005 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMNode";
+      parametersXmlDoc@1000000018 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMDocument";
+      nodeList@1000000019 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.IXMLDOMNodeList";
+      xmldocclass@1000000001 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.DOMDocumentClass";
+      xmlhttpclass@1000000000 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.XMLHTTPRequestClass";
+      NSTypes@1000000003 : TextConst 'ENU=http://schemas.microsoft.com/exchange/services/2006/types;ENG=http://schemas.microsoft.com/exchange/services/2006/types';
+      NSMessages@1000000002 : TextConst 'ENU=http://schemas.microsoft.com/exchange/services/2006/messages;ENG=http://schemas.microsoft.com/exchange/services/2006/messages';
+      XMLHTTPSend@1000000004 : Codeunit 50008;
+      nullVar@1000000006 : Variant;
+    BEGIN
+      // Create XML Document
+      xmldoc := xmldocclass.DOMDocumentClass;
+
+      // Create XMLHTTP and SEND
+      xmlhttp := xmlhttpclass.XMLHTTPRequestClass;
+      xmlhttp.open('GET', URL, FALSE,'','');
+      xmlhttp.setRequestHeader('Content-type', 'text/xml; charset=utf-8');
+      XMLHTTPSend.Set(xmlhttp,xmldoc);
+      COMMIT;
+
+      IF NOT XMLHTTPSend.RUN THEN BEGIN
+       EXIT(FALSE);
+      END;
+
+      XMLHTTPSend.Get(xmlhttp);
+
+      // If status is OK - Get Result XML
+      IF xmlhttp.status=200 THEN
+      BEGIN
+        xmldoc.loadXML(xmlhttp.responseText);
+        //xmldoc := xmlhttp.responseXML;
+        EXIT(TRUE);
+      END ELSE BEGIN
+        EXIT(FALSE);
+      END;
+    END;
+
+    PROCEDURE UpdateCustAddress@1000000002(VAR Line@1000000004 : ARRAY [5] OF Text[50];VAR Address@1000000006 : Text[50];VAR "Address 2"@1000000005 : Text[50]);
+    VAR
+      i@1000000000 : Integer;
+      Address1Full@1000000001 : Boolean;
+      Address2Full@1000000002 : Boolean;
+    BEGIN
+      //DOC IN49053 NC 15/01/2018 - Added code to read from the adress from more than just 2 lines.
+      Address :='';
+      "Address 2":='';
+
+      FOR i:=1 TO 5 DO BEGIN
+        //Check if we have space in address1 to add the line
+        IF Line[i]<>'' THEN BEGIN
+      //    IF (STRLEN(Address)+STRLEN(Line[i])<=50) THEN BEGIN    //DOC IN50316 CM 24/01/2018
+          IF (STRLEN(Address)+STRLEN(Line[i])<=48) THEN BEGIN    //DOC IN50316 CM 24/01/2018
+            IF Address <> '' THEN
+              Address := Address + ', ';
+            Address := Address + Line[i];
+          END ELSE
+            Address1Full :=TRUE;
+
+          //If address1 is full then we put in address2
+       //   IF Address1Full AND (STRLEN("Address 2")+STRLEN(Line[i])<=50) THEN BEGIN   //DOC IN50316 CM 24/01/2018
+          IF Address1Full AND (STRLEN("Address 2")+STRLEN(Line[i])<=48) THEN BEGIN   //DOC IN50316 CM 24/01/2018
+            IF "Address 2" <> '' THEN
+              "Address 2" := ', ';
+            "Address 2" := "Address 2" + Line[i];
+          END ELSE
+              IF Address1Full THEN
+                EXIT;
+        END;
+      END;
+    END;
+
+    BEGIN
+    {
+      //DOC OP10248 JF 03/08/2017 - Added code "GY" to the list of countries to retrive the post code
+      //DOC IN49053 NC 15/01/2018 - Added code to read from the adress from more than just 2 lines.
+      //DOC IN50316 CM 24/01/2018 - When the len is 50, gives an error
+    }
+    END.
+  }
+}
+
+OBJECT Codeunit 50008 XMLHttp Send
+{
+  OBJECT-PROPERTIES
+  {
+    Date=12/12/14;
+    Time=00:00:00;
+    Modified=Yes;
+    Version List=OP10248;
+  }
+  PROPERTIES
+  {
+    OnRun=VAR
+            TxtXmlDocNotSet@1000000000 : TextConst 'ENU=XMLHTTP and XMLDoc have not been set;ENG=XMLHTTP and XMLDoc have not been set';
+          BEGIN
+            IF NOT IsSet THEN ERROR(TxtXmlDocNotSet);
+            xmlhttp.send(xmldoc.xml);
+            IsSet := FALSE;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      xmldoc@1000000003 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.DOMDocument";
+      xmlhttp@1000000001 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.XMLHTTPRequest";
+      IsSet@1000000000 : Boolean;
+
+    PROCEDURE Set@1000000003(VAR xmlHTTP_In@1000000000 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.XMLHTTPRequest";VAR xmlDoc_In@1000000002 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.DOMDocument");
+    BEGIN
+      xmlhttp := xmlHTTP_In;
+      xmldoc := xmlDoc_In;
+      IsSet := TRUE;
+    END;
+
+    PROCEDURE Get@1000000001(VAR xmlHTTP_Out@1000000000 : DotNet "'Microsoft.MSXML, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.MSXML.XMLHTTPRequest");
+    BEGIN
+      xmlHTTP_Out := xmlhttp;
+    END;
+
+    BEGIN
+    {
+      //DOC NA2015.1 PC 01/03/2010 - Created
+    }
+    END.
+  }
+}
+
+OBJECT Page 50005 Post Code WS Buffer
+{
+  OBJECT-PROPERTIES
+  {
+    Date=17/03/17;
+    Time=16:02:46;
+    Modified=Yes;
+    Version List=OP10248;
+  }
+  PROPERTIES
+  {
+    InsertAllowed=No;
+    DeleteAllowed=No;
+    ModifyAllowed=No;
+    SourceTable=Table18;
+    PageType=List;
+  }
+  CONTROLS
+  {
+    { 1000000000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1000000001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1000000002;2;Field  ;
+                SourceExpr=Address }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+
